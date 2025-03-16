@@ -28,8 +28,7 @@ def on_message(socket, message):
         print(f"Processing Error: {e}")
 
 def process_suggestions(news_event):
-    """Process trading suggestions from the news event."""
-    suggestions = news_event.get("suggestions", [])
+    suggestions = news_event.get("suggestions")
     if suggestions:
         for suggestion in suggestions:
             coin = suggestion.get("coin")
@@ -39,4 +38,4 @@ def process_suggestions(news_event):
                 # make_trade(market_symbol, sentiment)
                 return
     else:
-        print("No suitable KuCoin trading symbol found in suggestions.")
+        print("No suitable trading symbol found in suggestions.")
