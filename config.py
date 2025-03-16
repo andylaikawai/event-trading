@@ -1,5 +1,8 @@
 # config.py
 
+is_backtest_mode = True  # Set this to True to enable backtesting
+
+
 # Tree News Configuration
 TREE_NEWS_API_KEY = 'b16f4e167abb76fb574622e7428d87e8a0f98443fa8019281ad239eb95f56758'
 WS_URLS = [
@@ -14,3 +17,4 @@ KUCOIN_PASSPHRASE = 'YOUR_KUCOIN_API_PASSPHRASE'
 
 # Trading Configuration
 DEFAULT_TRADE_AMOUNT = 0.0005  # Adjust per your risk tolerance
+

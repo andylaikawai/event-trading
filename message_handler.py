@@ -7,7 +7,8 @@ from trading import make_trade
 from sentiment_analysis import analyze_sentiment
 
 def on_message(socket, message):
-    logging.info(f"Raw WS Message ({socket.url}): {message}")
+    if socket:
+        logging.info(f"Raw WS Message ({socket.url}): {message}")
 
     try:
         news_event = json.loads(message)

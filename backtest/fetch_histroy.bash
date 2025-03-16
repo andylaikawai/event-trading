@@ -1,0 +1,1 @@
+curl https://news.treeofalpha.com/api/allNews > news_data.json
