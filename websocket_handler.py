@@ -1,19 +1,8 @@
-# websocket_handler.py
-
-import websocket
 import threading
 import time
-import logging
-from config import TREE_NEWS_API_KEY, WS_URLS
+import websocket
 
-# Logger Configuration
-logging.basicConfig(
-    filename='logs/ws_messages.log',
-    filemode='a',
-    level=logging.INFO,
-    format='%(asctime)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
+from config import TREE_NEWS_API_KEY, WS_URLS
 
 def init_connections(on_message):
     threads = []
