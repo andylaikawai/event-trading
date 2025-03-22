@@ -3,7 +3,9 @@ import logging
 import ccxt
 import requests
 from typing import Union
-from config import KUCOIN_API_KEY, KUCOIN_SECRET, KUCOIN_PASSPHRASE, DEFAULT_TRADE_AMOUNT
+
+from backtest.back_test import paper_trade
+from config import KUCOIN_API_KEY, KUCOIN_SECRET, KUCOIN_PASSPHRASE, DEFAULT_TRADE_AMOUNT, is_backtest_mode
 from type.type import Sentiment, Candles
 
 # Initialize exchange
@@ -14,33 +16,40 @@ exchange = ccxt.kucoin({
     'enableRateLimit': True,
 })
 
+
 def execute_trade_based_on_signals(symbol: str, timestamp: int):
-    signal = _get_trade_signals(symbol, timestamp)
-    _make_trade(symbol, signal)
+    sentiment = _get_sentiment(symbol, timestamp)
+    _make_trade(symbol, sentiment)
+
 
 def _make_trade(symbol: str, sentiment: Sentiment):
     trade_amount = DEFAULT_TRADE_AMOUNT
+    trade_executor = paper_trade if is_backtest_mode else _live_trade
+    trade_executor(symbol, trade_amount, sentiment)
+
+
+def _live_trade(symbol: str, trade_amount: float, sentiment: Sentiment):
     try:
         market = exchange.load_markets().get(symbol)
         if not market:
             logging.info(f"[TRADE] Symbol {symbol} not available on KuCoin.")
             return
-
-        if sentiment == Sentiment.POSITIVE:
-            order = exchange.create_market_buy_order(symbol, trade_amount)
-            logging.info(f"[TRADE] BUY executed: {order['id']} | {symbol}")
-
-        elif sentiment == Sentiment.NEGATIVE:
-            order = exchange.create_market_sell_order(symbol, trade_amount)
-            logging.info(f"[TRADE] SELL executed: {order['id']} | {symbol}")
-
-        else:
-            logging.info("[TRADE] Neutral sentiment detected. No trade executed.")
-
     except Exception as e:
         logging.error(f"[TRADE] Trade Error: {e}")
 
-def _get_trade_signals(symbol: str, timestamp: int) -> Sentiment:
+    if sentiment == Sentiment.POSITIVE:
+        order = exchange.create_market_buy_order(symbol, trade_amount)
+        logging.info(f"[TRADE] BUY executed: {order['id']} | {symbol}")
+
+    elif sentiment == Sentiment.NEGATIVE:
+        order = exchange.create_market_sell_order(symbol, trade_amount)
+        logging.info(f"[TRADE] SELL executed: {order['id']} | {symbol}")
+
+    elif sentiment == Sentiment.NEUTRAL:
+        logging.info("[TRADE] Neutral sentiment detected. No trade executed.")
+
+
+def _get_sentiment(symbol: str, timestamp: int) -> Sentiment:
     candles = _fetch_market_price(symbol, timestamp)
     if candles is None:
         return Sentiment.NEUTRAL
@@ -80,4 +89,3 @@ def _fetch_market_price(symbol: str, timestamp: int) -> Union[Candles, None]:
     else:
         print(f'Failed to fetch market price with response: {response}')
         return None
-
