@@ -15,6 +15,7 @@ def run_backtest(news_data, on_historical_message):
     for news_event in news_data:
         message = json.dumps(news_event)
         on_historical_message(None, message)
+    evaluate_results()
 
 trades = []  # Store trades made during backtesting
 

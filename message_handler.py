@@ -25,4 +25,4 @@ def on_message(socket, message):
 
 
     except Exception as e:
-        print(f"Processing Error: {e}")
+        logging.error(f"[ERROR] Processing Error: {e}")

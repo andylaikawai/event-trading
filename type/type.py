@@ -1,7 +1,10 @@
-from datetime import datetime, timezone
+from datetime import time
 from enum import Enum
-
 from typing import NamedTuple, List
+
+from config import DATE_TIME_FORMAT
+from utils.util import format_time
+
 
 class Candle(NamedTuple):
     timestamp: int
@@ -22,7 +25,7 @@ class Candle(NamedTuple):
             low=ohlcv[3],
             close=ohlcv[4],
             volume=ohlcv[5],
-            datetime=datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+            datetime=format_time(timestamp)
         )
 
 Candles = List[Candle]

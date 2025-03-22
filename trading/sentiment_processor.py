@@ -4,7 +4,7 @@ from typing import Union
 from ccxt.static_dependencies.toolz import first
 
 from backtest.back_test import paper_trade
-from config import DEFAULT_TRADE_AMOUNT, is_backtest_mode
+from config import DEFAULT_TRADE_AMOUNT, IS_BACKTEST_MODE
 from trading.exchange import exchange
 from trading.trade_executor import live_trade
 from type.type import Sentiment, Candles, Candle
@@ -19,7 +19,7 @@ def execute_trade_based_on_signals(symbol: str, timestamp: int):
 
 def _make_trade(symbol: str, sentiment: Sentiment):
     trade_amount = DEFAULT_TRADE_AMOUNT
-    trade_executor = paper_trade if is_backtest_mode else live_trade
+    trade_executor = paper_trade if IS_BACKTEST_MODE else live_trade
     trade_executor(symbol, trade_amount, sentiment)
 
 
@@ -33,10 +33,10 @@ def _get_sentiment(symbol: str, candles: Union[Candles, None]) -> Sentiment:
     current_close = float(last_candle.close)
 
     if current_close > previous_close * 1.001:
-        logging.info(f"[TRADE] Positive sentiment detected for {symbol}.")
+        logging.debug(f"[TRADE] Positive sentiment detected for {symbol}.")
         return Sentiment.POSITIVE
     elif current_close < previous_close * 0.999:
-        logging.info(f"[TRADE] Negative sentiment detected for {symbol}.")
+        logging.debug(f"[TRADE] Negative sentiment detected for {symbol}.")
         return Sentiment.NEGATIVE
     else:
         return Sentiment.NEUTRAL

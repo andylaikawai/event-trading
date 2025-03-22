@@ -1,7 +1,7 @@
 import time
 
 from backtest.back_test import load_historical_news, run_backtest
-from config import is_backtest_mode
+from config import IS_BACKTEST_MODE
 from websocket_handler import init_connections
 from message_handler import on_message
 from logger import setup_logger
@@ -12,7 +12,7 @@ setup_logger()
 # === Main Execution ===
 if __name__ == "__main__":
 
-    if is_backtest_mode:
+    if IS_BACKTEST_MODE:
         news_data = load_historical_news()
         run_backtest(news_data, on_message)
     else:

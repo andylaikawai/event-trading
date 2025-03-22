@@ -23,4 +23,4 @@ def live_trade(symbol: str, trade_amount: float, sentiment: Sentiment):
         logging.info(f"[TRADE] SELL executed: {order['id']} | {symbol}")
 
     elif sentiment == Sentiment.NEUTRAL:
-        logging.info("[TRADE] Neutral sentiment detected. No trade executed.")
+        logging.debug("[TRADE] Neutral sentiment detected. No trade executed.")
