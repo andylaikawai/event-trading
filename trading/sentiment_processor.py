@@ -28,8 +28,8 @@ def _get_sentiment(symbol: str, timestamp: int) -> Sentiment:
 
     first_candle = candles[0]
     last_candle = candles[-1]
-    previous_close = float(first_candle[2])
-    current_close = float(last_candle[2])
+    previous_close = float(first_candle.close)
+    current_close = float(last_candle.close)
 
     if current_close > previous_close * 1.001:
         logging.info(f"[TRADE] Positive sentiment detected for {symbol}.")
@@ -52,16 +52,7 @@ def _fetch_market_price(symbol: str, timestamp: int) -> Union[Candles, None]:
         # Fetch historical market data with a 1-minute interval
         ohlcv = exchange.fetch_ohlcv(f"{symbol}/USDT", timeframe='1m', since=start_time, limit=2)
 
-        return [
-            Candle(
-                timestamp=str(candle[0]),
-                open=str(candle[1]),
-                high=str(candle[2]),
-                low=str(candle[3]),
-                close=str(candle[4]),
-                volume=str(candle[5])
-            ) for candle in ohlcv
-        ]
+        return [Candle.from_ohlcv(candle) for candle in ohlcv]
 
     except Exception as e:
         logging.error(f"Failed to fetch market price: {e}")
