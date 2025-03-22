@@ -1,8 +1,6 @@
-from datetime import time
 from enum import Enum
 from typing import NamedTuple, List
 
-from config import DATE_TIME_FORMAT
 from utils.util import format_time
 
 

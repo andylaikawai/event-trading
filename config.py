@@ -2,7 +2,7 @@
 import logging
 
 IS_BACKTEST_MODE = True  # Set this to True to enable backtesting
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.WARNING
 DATE_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 # Tree News Configuration

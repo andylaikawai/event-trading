@@ -3,6 +3,7 @@ import logging
 
 from logger import display_news, display_login_message
 from sentiment_analysis import analyze_sentiment
+from type.news_event import NewsEvent
 
 
 def on_message(socket, message):
@@ -10,19 +11,13 @@ def on_message(socket, message):
         logging.info(f"Raw WS Message ({socket.url}): {message}")
 
     try:
-        news_event = json.loads(message)
-        headline = news_event.get("title")
+        news_event = NewsEvent.from_dict(json.loads(message))
 
-        if headline:
-            display_news(headline, news_event)
+        if news_event.title:
+            display_news(news_event)
             analyze_sentiment(news_event)
         else:
             display_login_message(news_event)
-
-        # Uncomment to enable sentiment analysis
-        # sentiment = analyze_sentiment(headline, content)
-        # print(f"Sentiment: {sentiment}")
-
 
     except Exception as e:
         logging.error(f"[ERROR] Processing Error: {e}")

@@ -1,8 +1,6 @@
 import logging
 from typing import Union
 
-from ccxt.static_dependencies.toolz import first
-
 from backtest.back_test import paper_trade
 from config import DEFAULT_TRADE_AMOUNT, IS_BACKTEST_MODE
 from trading.exchange import exchange
@@ -10,11 +8,11 @@ from trading.trade_executor import live_trade
 from type.type import Sentiment, Candles, Candle
 
 
-def execute_trade_based_on_signals(symbol: str, timestamp: int):
+def execute_trade_based_on_signals(symbol: str, timestamp: int) -> bool:
     candles = _fetch_market_price(symbol, timestamp)
     sentiment = _get_sentiment(symbol, candles)
     _make_trade(symbol, sentiment)
-    _detect_price_movement(candles)
+    return _detect_price_movement(candles)
 
 
 def _make_trade(symbol: str, sentiment: Sentiment):
@@ -58,10 +56,11 @@ def _fetch_market_price(symbol: str, timestamp: int) -> Union[Candles, None]:
         logging.error(f"[ERROR] Failed to fetch market price: {e}")
         return None
 
-def _detect_price_movement(candles: Candles):
+
+def _detect_price_movement(candles: Candles) -> Union[float, None]:
     """Detect if the market price moved by more than 2%."""
     if candles is None or len(candles) < 2:
-        return
+        return None
 
     initial_price = candles[0].close
     final_price = candles[-1].close
@@ -69,5 +68,7 @@ def _detect_price_movement(candles: Candles):
     price_change = (final_price - initial_price) / initial_price
 
     abs_price_change = abs(price_change)
-    if abs_price_change > 0.02 or abs_price_change < -0.02:
-        logging.warning("[Trade] Price movement detected.")
+    if abs_price_change > 0.02:
+        return price_change
+
+    return None

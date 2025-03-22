@@ -1,24 +1,30 @@
+import logging
+
 from trading.sentiment_processor import execute_trade_based_on_signals
+from type.news_event import NewsEvent
 
 
-def _process_suggestions(news_event):
-    suggestions = news_event.get("suggestions")
+def _process_suggestions(news_event: NewsEvent):
+    suggestions = news_event.suggestions
     if suggestions:
         for suggestion in suggestions:
             coin = suggestion.get("coin")
             if coin:
-                print(f"Relevant coin identified: {coin}")
+                logging.debug(f"Relevant coin identified: {coin}")
                 return coin
     else:
-        print("No suitable trading symbol found in suggestions.")
         return None
 
-def analyze_sentiment(news_event):
+def analyze_sentiment(news_event: NewsEvent):
     symbol = _process_suggestions(news_event)
-    timestamp = news_event.get("time")
+    timestamp = news_event.time
 
     if symbol == "BTC":
-        execute_trade_based_on_signals(symbol, timestamp)
+        market_moved = execute_trade_based_on_signals(symbol, timestamp)
+        if market_moved:
+            source = news_event.link or news_event.url or "-"
+            logging.warning(f"[ANALYSIS] Market moved by {market_moved}% at {news_event.datetime} for news: {source}")
+            logging.warning(f"{news_event.title}")
     return
 
 

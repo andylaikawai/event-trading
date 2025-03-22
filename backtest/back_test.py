@@ -2,6 +2,7 @@ import json
 import logging
 import time
 
+from type.news_event import NewsEvent
 from type.type import Sentiment
 
 file_path = 'backtest/news_data.json'
@@ -12,8 +13,9 @@ def load_historical_news():
 
 def run_backtest(news_data, on_historical_message):
     """Run backtesting using historical news data."""
-    for news_event in news_data:
-        message = json.dumps(news_event)
+    for news_event_data in news_data:
+        news_event = NewsEvent.from_dict(news_event_data)
+        message = json.dumps(news_event._asdict())
         on_historical_message(None, message)
     evaluate_results()
 
