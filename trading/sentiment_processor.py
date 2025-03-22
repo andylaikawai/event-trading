@@ -11,8 +11,10 @@ from type.type import Sentiment, Candles, Candle
 
 
 def execute_trade_based_on_signals(symbol: str, timestamp: int):
-    sentiment = _get_sentiment(symbol, timestamp)
+    candles = _fetch_market_price(symbol, timestamp)
+    sentiment = _get_sentiment(symbol, candles)
     _make_trade(symbol, sentiment)
+    _detect_price_movement(candles)
 
 
 def _make_trade(symbol: str, sentiment: Sentiment):
@@ -21,8 +23,7 @@ def _make_trade(symbol: str, sentiment: Sentiment):
     trade_executor(symbol, trade_amount, sentiment)
 
 
-def _get_sentiment(symbol: str, timestamp: int) -> Sentiment:
-    candles = _fetch_market_price(symbol, timestamp)
+def _get_sentiment(symbol: str, candles: Union[Candles, None]) -> Sentiment:
     if candles is None:
         return Sentiment.NEUTRAL
 
@@ -47,13 +48,26 @@ def _fetch_market_price(symbol: str, timestamp: int) -> Union[Candles, None]:
         # Convert timestamp to seconds
         timestamp_seconds = timestamp / 1000
         start_time = int(timestamp_seconds - 120) * 1000  # 2 minutes before the news timestamp in milliseconds
-        end_time = int(timestamp_seconds) * 1000  # At the news timestamp in milliseconds
 
         # Fetch historical market data with a 1-minute interval
-        ohlcv = exchange.fetch_ohlcv(f"{symbol}/USDT", timeframe='1m', since=start_time, limit=2)
+        ohlcv = exchange.fetch_ohlcv(f"{symbol}/USDT", timeframe='1m', since=start_time, limit=32)
 
         return [Candle.from_ohlcv(candle) for candle in ohlcv]
 
     except Exception as e:
-        logging.error(f"Failed to fetch market price: {e}")
+        logging.error(f"[ERROR] Failed to fetch market price: {e}")
         return None
+
+def _detect_price_movement(candles: Candles):
+    """Detect if the market price moved by more than 2%."""
+    if candles is None or len(candles) < 2:
+        return
+
+    initial_price = candles[0].close
+    final_price = candles[-1].close
+
+    price_change = (final_price - initial_price) / initial_price
+
+    abs_price_change = abs(price_change)
+    if abs_price_change > 0.02 or abs_price_change < -0.02:
+        logging.warning("[Trade] Price movement detected.")
