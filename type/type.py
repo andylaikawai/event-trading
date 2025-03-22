@@ -1,8 +1,16 @@
 from enum import Enum
-from typing import List, Tuple
 
-Candle = Tuple[str, str, str, str, str, str]  # Define a custom type for a candle
-Candles = List[Candle]  # Define a custom type for a list of candles
+from typing import NamedTuple, List
+
+class Candle(NamedTuple):
+    timestamp: str
+    open: str
+    high: str
+    low: str
+    close: str
+    volume: str
+
+Candles = List[Candle]
 
 class Sentiment(Enum):
     POSITIVE = "Positive"

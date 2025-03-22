@@ -1,4 +1,5 @@
-from trading import execute_trade_based_on_signals
+from trading.sentiment_processor import execute_trade_based_on_signals
+
 
 def _process_suggestions(news_event):
     suggestions = news_event.get("suggestions")

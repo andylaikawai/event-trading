@@ -1,0 +1,26 @@
+import logging
+
+from trading.exchange import exchange
+from type.type import Sentiment
+
+
+
+def live_trade(symbol: str, trade_amount: float, sentiment: Sentiment):
+    try:
+        market = exchange.load_markets().get(symbol)
+        if not market:
+            logging.info(f"[TRADE] Symbol {symbol} not available on KuCoin.")
+            return
+    except Exception as e:
+        logging.error(f"[TRADE] Trade Error: {e}")
+
+    if sentiment == Sentiment.POSITIVE:
+        order = exchange.create_market_buy_order(symbol, trade_amount)
+        logging.info(f"[TRADE] BUY executed: {order['id']} | {symbol}")
+
+    elif sentiment == Sentiment.NEGATIVE:
+        order = exchange.create_market_sell_order(symbol, trade_amount)
+        logging.info(f"[TRADE] SELL executed: {order['id']} | {symbol}")
+
+    elif sentiment == Sentiment.NEUTRAL:
+        logging.info("[TRADE] Neutral sentiment detected. No trade executed.")
