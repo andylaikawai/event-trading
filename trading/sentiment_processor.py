@@ -1,34 +1,33 @@
 import logging
-from typing import Union
+from typing import Union, Optional
 
 from backtest.back_test import paper_trade
-from config import DEFAULT_TRADE_AMOUNT, IS_BACKTEST_MODE
+from config import IS_BACKTEST_MODE
 from trading.exchange import exchange
 from trading.trade_executor import live_trade
 from type.type import Sentiment, Candles, Candle
 
 
-def execute_trade_based_on_signals(symbol: str, timestamp: int) -> bool:
+def execute_trade_based_on_signals(symbol: str, timestamp: int) -> Optional[float]:
     candles = _fetch_market_price(symbol, timestamp)
     sentiment = _get_sentiment(symbol, candles)
-    _make_trade(symbol, sentiment)
+    _make_trade(symbol, sentiment, candles)
     return _detect_price_movement(candles)
 
 
-def _make_trade(symbol: str, sentiment: Sentiment):
-    trade_amount = DEFAULT_TRADE_AMOUNT
+def _make_trade(symbol: str, sentiment: Sentiment, candles: Candles):
     trade_executor = paper_trade if IS_BACKTEST_MODE else live_trade
-    trade_executor(symbol, trade_amount, sentiment)
+    trade_executor(symbol, sentiment, candles)
 
 
 def _get_sentiment(symbol: str, candles: Union[Candles, None]) -> Sentiment:
-    if candles is None:
+    if candles is None or len(candles) < 3:
         return Sentiment.NEUTRAL
 
     first_candle = candles[0]
-    last_candle = candles[-1]
+    current_candle = candles[2]
     previous_close = float(first_candle.close)
-    current_close = float(last_candle.close)
+    current_close = float(current_candle.close)
 
     if current_close > previous_close * 1.001:
         logging.debug(f"[TRADE] Positive sentiment detected for {symbol}.")
@@ -43,11 +42,9 @@ def _get_sentiment(symbol: str, candles: Union[Candles, None]) -> Sentiment:
 def _fetch_market_price(symbol: str, timestamp: int) -> Union[Candles, None]:
     """Fetch the market price from KuCoin at a specific timestamp using ccxt."""
     try:
-        # Convert timestamp to seconds
         timestamp_seconds = timestamp / 1000
         start_time = int(timestamp_seconds - 120) * 1000  # 2 minutes before the news timestamp in milliseconds
 
-        # Fetch historical market data with a 1-minute interval
         ohlcv = exchange.fetch_ohlcv(f"{symbol}/USDT", timeframe='1m', since=start_time, limit=32)
 
         return [Candle.from_ohlcv(candle) for candle in ohlcv]
@@ -69,6 +66,6 @@ def _detect_price_movement(candles: Candles) -> Union[float, None]:
 
     abs_price_change = abs(price_change)
     if abs_price_change > 0.02:
-        return price_change
+        return price_change * 100
 
     return None

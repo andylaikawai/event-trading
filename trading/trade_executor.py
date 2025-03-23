@@ -1,11 +1,10 @@
 import logging
 
 from trading.exchange import exchange
-from type.type import Sentiment
+from type.type import Sentiment, Candles
 
-
-
-def live_trade(symbol: str, trade_amount: float, sentiment: Sentiment):
+# FIXME 3 args
+def live_trade(symbol: str, trade_amount: float, sentiment: Sentiment, candles: Candles):
     try:
         market = exchange.load_markets().get(symbol)
         if not market:
