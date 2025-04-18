@@ -23,8 +23,8 @@ def analyze_sentiment(news_event: NewsEvent):
         market_moved = execute_trade_based_on_signals(symbol, timestamp)
         if market_moved:
             source = news_event.link or news_event.url or "-"
-            logging.info(f"[ANALYSIS] Market moved by {market_moved:.2f}% at {news_event.datetime} for news: {source}")
             logging.info(f"{news_event.title}")
+            logging.info(f"[ANALYSIS] Market moved by {market_moved:.2f}% at {news_event.datetime} for news: {source}")
     return
 
 

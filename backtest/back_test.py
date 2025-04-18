@@ -13,7 +13,7 @@ current_capital = STARTING_CAPITAL
 trades: List[Dict] = []
 
 
-def load_historical_news():
+def load_historical_news() -> [Dict]:
     with open(file_path, 'r') as file:
         return json.load(file)
 
@@ -30,13 +30,13 @@ def run_backtest(news_data, on_historical_message):
     evaluate_results()
 
 
-def paper_trade(symbol: str, sentiment: Sentiment, candles: Candles):
+def paper_trade(symbol: str, sentiment: Sentiment, candle: Candle, performance_candles: Candles):
     if sentiment == Sentiment.NEUTRAL:
         logging.debug("[TRADE] Neutral sentiment detected. No trade executed.")
         return
 
-    entry_price = candles[2].close
-    entry_time = candles[2].timestamp
+    entry_price = candle.close
+    entry_time = candle.timestamp
     trade_amount = current_capital / entry_price
 
     trade = {
@@ -54,10 +54,10 @@ def paper_trade(symbol: str, sentiment: Sentiment, candles: Candles):
     logging.debug(f"[TRADE] Paper traded: {trade}")
 
     # Schedule exit after 30 minutes
-    exit_trade(trade, candles)
+    exit_trade(trade, performance_candles)
 
 
-def exit_trade(trade: Dict, candles: List[Candle], minutes: int = 29):
+def exit_trade(trade: Dict, candles: Candles, minutes: int = 29):
     global current_capital
 
     exit_time = trade['entry_time'] + 1000 * 60 * minutes
@@ -69,7 +69,7 @@ def exit_trade(trade: Dict, candles: List[Candle], minutes: int = 29):
         trade['price_change_percent'] = round(((trade['exit_price'] - trade['entry_price']) / trade['entry_price']) * 100, 2)
         trade['pnl'] = calculate_pnl(trade)
         current_capital += trade['pnl']
-        logging.debug(f"[TRADE] Exited trade: {trade}")
+        logging.info(f"[TRADE] Exited trade: {trade}")
         evaluate_results()
 
 
@@ -84,7 +84,6 @@ def calculate_pnl(trade: Dict) -> float:
 def evaluate_results():
     total_pnl = sum(trade['pnl'] for trade in trades if trade['pnl'] is not None)
     pnl_percentage = round((current_capital / STARTING_CAPITAL) * 100, 2)
-
     win_ratio = _get_win_ratio()
 
     logging.info(f"[Trade] Total trades made: {len(trades)}")
