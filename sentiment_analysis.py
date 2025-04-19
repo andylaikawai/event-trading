@@ -23,10 +23,10 @@ def analyze_sentiment(news_event: NewsEvent):
     sentiment = _get_sentiment(symbol, previous_candle, observation_candles)
 
     market_moved = execute_trade_based_on_sentiment(symbol, sentiment, observation_candles[-1], performance_candles)
-    if market_moved:
-        source = news_event.link or news_event.url or "-"
-        logging.info(f"{news_event.title}")
-        logging.info(f"[ANALYSIS] Market moved by {market_moved:.2f}% at {news_event.datetime} for news: {source}")
+    # if market_moved:
+    #     source = news_event.link or news_event.url or "-"
+    #     logging.info(f"{news_event.title}")
+    #     logging.info(f"[ANALYSIS] Market moved by {market_moved:.2f}% at {news_event.datetime} for news: {source}")
     return
 
 def _process_suggestions(news_event: NewsEvent):
@@ -62,9 +62,6 @@ def _fetch_market_price(symbol: str, timestamp: int) -> Tuple[Optional[Candles],
         return None, None, None
 
 def _get_sentiment(symbol: str, previous_candles: Candles, observation_candles: Candles) -> Sentiment:
-    if previous_candles is None or observation_candles is None:
-        return Sentiment.NEUTRAL
-
     first_candle = previous_candles[0]
     current_candle = observation_candles[-1]
     previous_close = first_candle.close

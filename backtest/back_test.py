@@ -2,13 +2,14 @@ import json
 import logging
 from typing import List, Dict
 
-from config import STARTING_CAPITAL
+from config import STARTING_CAPITAL, TAKE_PROFIT, STOP_LOSS
 from type.news_event import NewsEvent
 from type.type import Sentiment, Candle, Candles
+from utils.util import round_to_2dp
 
 MAX_NUMBER_OF_TRADES = 500
 
-file_path = 'backtest/news_data.json'
+file_path = 'backtest/news_data_20250319-0418.json'
 current_capital = STARTING_CAPITAL
 trades: List[Dict] = []
 
@@ -27,22 +28,26 @@ def run_backtest(news_data, on_historical_message):
         news_event = NewsEvent.from_dict(news_event_data)
         message = json.dumps(news_event._asdict())
         on_historical_message(None, message)
-    evaluate_results()
+    _evaluate_result()
 
 
 def paper_trade(symbol: str, sentiment: Sentiment, candle: Candle, performance_candles: Candles):
     if sentiment == Sentiment.NEUTRAL:
         logging.debug("[TRADE] Neutral sentiment detected. No trade executed.")
         return
+    if any(trade['symbol'] == symbol and trade['entry_time'] == candle.timestamp for trade in trades):
+        logging.debug(f"[TRADE] Duplicate trade detected for {symbol} at {candle.timestamp}. Skipping trade.")
+        return
 
     entry_price = candle.close
     entry_time = candle.timestamp
     trade_amount = current_capital / entry_price
 
+    [f_amount] = round_to_2dp(trade_amount)
     trade = {
         'symbol': symbol,
         'direction': sentiment.name,
-        'amount': trade_amount,
+        'amount': f_amount,
         'entry_price': entry_price,
         'entry_time': entry_time,
         'exit_price': None,
@@ -54,26 +59,47 @@ def paper_trade(symbol: str, sentiment: Sentiment, candle: Candle, performance_c
     logging.debug(f"[TRADE] Paper traded: {trade}")
 
     # Schedule exit after 30 minutes
-    exit_trade(trade, performance_candles)
+    _exit_trade(trade, performance_candles)
 
+def _get_exit_candle(trade: Dict, candles: Candles, exit_time: int) -> Candle:
+    entry_price = trade['entry_price']
+    direction = trade['direction']
 
-def exit_trade(trade: Dict, candles: Candles, minutes: int = 29):
+    for candle in candles:
+        if candle.timestamp >= exit_time:
+            logging.debug(f"[TRADE] Exited trade: {trade}")
+            return candle
+
+        price_change = (candle.close - entry_price) / entry_price
+        if direction == Sentiment.NEGATIVE.name:
+            price_change *= -1
+        if price_change >= TAKE_PROFIT:
+            logging.debug(f"[TRADE] Exited trade at take profit: {trade}")
+            return candle
+        if price_change <= STOP_LOSS:
+            logging.debug(f"[TRADE] Exited trade at stop loss: {trade}")
+            return candle
+
+    return candles[-1]
+
+def _exit_trade(trade: Dict, candles: Candles, minutes: int = 29):
     global current_capital
 
     exit_time = trade['entry_time'] + 1000 * 60 * minutes
-    exit_candle = next((candle for candle in candles if candle.timestamp >= exit_time), None)
+    entry_price = trade['entry_price']
+    exit_candle = _get_exit_candle(trade, candles, exit_time)
 
-    if exit_candle:
-        trade['exit_price'] = exit_candle.close
-        trade['exit_time'] = exit_candle.timestamp
-        trade['price_change_percent'] = round(((trade['exit_price'] - trade['entry_price']) / trade['entry_price']) * 100, 2)
-        trade['pnl'] = calculate_pnl(trade)
-        current_capital += trade['pnl']
-        logging.info(f"[TRADE] Exited trade: {trade}")
-        evaluate_results()
+    exit_price = exit_candle.close
+    price_change_percent = ((exit_price - entry_price) / entry_price) * 100
+    trade['exit_price'] = exit_price
+    trade['exit_time'] = exit_candle.timestamp
+    trade['price_change_percent'] = round_to_2dp(price_change_percent)[0]
+    trade['pnl'] = round_to_2dp(_calculate_pnl(trade))[0]
+    current_capital += trade['pnl']
+    _log_performance()
 
 
-def calculate_pnl(trade: Dict) -> float:
+def _calculate_pnl(trade: Dict) -> float:
     if trade['direction'] == Sentiment.POSITIVE.name:
         return (trade['exit_price'] - trade['entry_price']) * trade['amount']
     elif trade['direction'] == Sentiment.NEGATIVE.name:
@@ -81,16 +107,37 @@ def calculate_pnl(trade: Dict) -> float:
     return 0.0
 
 
-def evaluate_results():
+def _log_performance():
     total_pnl = sum(trade['pnl'] for trade in trades if trade['pnl'] is not None)
     pnl_percentage = (current_capital / STARTING_CAPITAL) * 100
     win_ratio = _get_win_ratio()
-    [formatted_total_pnl, formatted_pnl, formatted_win_ratio] = map(lambda x: (round(x, 2)), [total_pnl, pnl_percentage, win_ratio])
+    [formatted_total_pnl, formatted_pnl, formatted_win_ratio] = round_to_2dp(total_pnl, pnl_percentage, win_ratio)
 
     logging.info(f"[Trade] Total trades made: {len(trades)}")
     logging.info(f"[Trade] Total PnL: {formatted_total_pnl}")
-    logging.info(f"[Trade] Win Ratio: {formatted_pnl}%")
-    logging.info(f"[Trade] Performance: {formatted_win_ratio}%")
+    logging.info(f"[Trade] Win Ratio: {formatted_win_ratio}%")
+    logging.info(f"[Trade] Performance: {formatted_pnl}%")
+
+
+def _evaluate_result():
+    if not trades:
+        logging.info("[EVALUATION] No trades to evaluate.")
+        return
+
+    sorted_trades = sorted(trades, key=lambda trade: trade['pnl'], reverse=True)
+
+    # Get top 10 gainers and losers
+    top_gainers = sorted_trades[:10]
+    top_losers = sorted_trades[-10:]
+
+    logging.info("[EVALUATION] Top 10 Gainers:")
+    for trade in top_gainers:
+        logging.info(trade)
+
+    logging.info("[EVALUATION] Top 10 Losers:")
+    for trade in reversed(top_losers):  # Reverse to show the largest losses first
+        logging.info(trade)
+
 
 def _get_win_ratio() -> float:
     if not trades:
