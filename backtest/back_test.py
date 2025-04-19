@@ -83,13 +83,14 @@ def calculate_pnl(trade: Dict) -> float:
 
 def evaluate_results():
     total_pnl = sum(trade['pnl'] for trade in trades if trade['pnl'] is not None)
-    pnl_percentage = round((current_capital / STARTING_CAPITAL) * 100, 2)
+    pnl_percentage = (current_capital / STARTING_CAPITAL) * 100
     win_ratio = _get_win_ratio()
+    [formatted_total_pnl, formatted_pnl, formatted_win_ratio] = map(lambda x: (round(x, 2)), [total_pnl, pnl_percentage, win_ratio])
 
     logging.info(f"[Trade] Total trades made: {len(trades)}")
-    logging.info(f"[Trade] Total PnL: {total_pnl}")
-    logging.info(f"[Trade] Win Ratio: {win_ratio}")
-    logging.info(f"[Trade] Performance: {pnl_percentage}%")
+    logging.info(f"[Trade] Total PnL: {formatted_total_pnl}")
+    logging.info(f"[Trade] Win Ratio: {formatted_pnl}%")
+    logging.info(f"[Trade] Performance: {formatted_win_ratio}%")
 
 def _get_win_ratio() -> float:
     if not trades:
