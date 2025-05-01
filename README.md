@@ -1,7 +1,9 @@
 # Tech Stack
+
 - Python 3.9.6
 
 # Install dependencies
+
 - `pip install -r requirements.txt`
 
 # How to use
