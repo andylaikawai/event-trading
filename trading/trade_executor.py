@@ -10,7 +10,7 @@ def live_trade(symbol: str, trade_amount: float, sentiment: Sentiment, candles: 
     try:
         market = exchange.load_markets().get(symbol)
         if not market:
-            logging.info(f"[TRADE] Symbol {symbol} not available on KuCoin.")
+            logging.info(f"[TRADE] Symbol {symbol} not available.")
             return
     except Exception as e:
         logging.error(f"[TRADE] Trade Error: {e}")

@@ -22,12 +22,12 @@ For each news item, given the time of the news, the script will populate:
 - previous candles: 3 minutes prior to the news timestamp, for sentiment analysis purpose
 - observation candles: 3 minutes after the news timestamp, for sentiment analysis purpose (e.g. observe whether the
   price / volume changes after the news)
-- performance candles: 30 minutes after the news timestamp, for performance evaluation purpose only. Should not be used
+- performance candle: 30 minutes after the news timestamp, for performance evaluation purpose only. Should not be used
   for sentiment analysis.
 
 Sample
 
-```
+```json
 [
   {
     "title": "CoinDesk (@CoinDesk): As countries like the U.S. and El Salvador buy bitcoin for their reserves, yours should too, says @anuragarjun @AvailProject. \n\nOpinion. \n\ntrib.al/JUwmSVt",
@@ -44,7 +44,15 @@ Sample
         1.745632,
         "2025-03-31 23:34:00"
       ],
-      ...
+      [
+        1743435300000,
+        83665.9,
+        83718.6,
+        83625.6,
+        83641.5,
+        2.16294505,
+        "2025-03-31 23:35:00"
+      ],
       [
         1743435360000,
         83641.5,
@@ -65,7 +73,15 @@ Sample
         0.55174547,
         "2025-03-31 23:37:00"
       ],
-      ...
+      [
+        1743435480000,
+        83575.7,
+        83641.4,
+        83575.7,
+        83591.8,
+        0.6371007,
+        "2025-03-31 23:38:00"
+      ],
       [
         1743435540000,
         83582.9,
@@ -76,29 +92,16 @@ Sample
         "2025-03-31 23:39:00"
       ]
     ],
-    "performance_candles": [
-      [
-        1743435420000,
-        83547.0,
-        83610.1,
-        83547.0,
-        83575.6,
-        0.55174547,
-        "2025-03-31 23:37:00"
-      ],
-      ...
-      [
-        1743437160000,
-        83579.7,
-        83614.5,
-        83571.7,
-        83594.0,
-        1.37906947,
-        "2025-04-01 00:06:00"
-      ]
+    "performance_candle": [
+      1743437160000,
+      83579.7,
+      83614.5,
+      83571.7,
+      83594.0,
+      1.37906947,
+      "2025-04-01 00:06:00"
     ]
-  },
-  ...
+  }
 ]
 ```
 
