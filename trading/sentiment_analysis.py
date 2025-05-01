@@ -1,14 +1,12 @@
 import logging
 from functools import reduce
-from typing import Tuple, Optional
 
 from trading.sentiment_processor import execute_trade_based_on_sentiment
 from model.news_event import NewsEvent
-from config import MAX_OBSERVATION_PERIOD, MAX_HOLDING_PERIOD, LOOK_BACK_PERIOD
-from trading.exchange import exchange
-from model.candles import Candles, Candle
+from trading.exchange import fetch_relevant_candles
+from model.candles import Candles
 from model.sentiment import Sentiment
-from utils.util import min_to_ms
+
 
 def analyze_sentiment(news_event: NewsEvent):
     symbol = _process_suggestions(news_event)
@@ -17,7 +15,7 @@ def analyze_sentiment(news_event: NewsEvent):
 
     timestamp = news_event.time
     
-    previous_candle, observation_candles, performance_candles = _fetch_market_price(symbol, timestamp)
+    previous_candle, observation_candles, performance_candles = fetch_relevant_candles(symbol, timestamp)
     if previous_candle is None or observation_candles is None or performance_candles is None:
         return
 
@@ -41,26 +39,6 @@ def _process_suggestions(news_event: NewsEvent):
     else:
         return None
 
-def _fetch_market_price(symbol: str, timestamp: int) -> Tuple[Optional[Candles], Optional[Candles], Optional[Candles]]:
-    number_of_candles = LOOK_BACK_PERIOD + MAX_OBSERVATION_PERIOD + MAX_HOLDING_PERIOD
-    start_candle_timestamp = timestamp - min_to_ms(LOOK_BACK_PERIOD)
-
-    try:
-        ohlcv = exchange.fetch_ohlcv(f"{symbol}/USDT", timeframe='1m', since=start_candle_timestamp, limit=number_of_candles)
-        candles = [Candle.from_ohlcv(candle) for candle in ohlcv]
-
-        # Split candles into previous/current for sentiment analysis and future for performance evaluation
-        # TODO this is backtest specific
-        observe_until = timestamp + min_to_ms(MAX_OBSERVATION_PERIOD)
-        previous_candles = [candle for candle in candles if candle.timestamp <= timestamp]
-        observation_candles = [candle for candle in candles if timestamp < candle.timestamp <= observe_until]
-        performance_candles = [candle for candle in candles if candle.timestamp > observe_until]
-
-        return previous_candles, observation_candles, performance_candles
-
-    except Exception as e:
-        logging.debug(f"[ERROR] Failed to fetch market price: {e}")
-        return None, None, None
 
 def _get_sentiment(symbol: str, previous_candles: Candles, observation_candles: Candles) -> Sentiment:
     first_candle = previous_candles[0]
