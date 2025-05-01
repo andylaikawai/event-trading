@@ -8,5 +8,6 @@
 
 # How to use
 
-- run `data/data_preprocessor.py`. see README.md in `data` folder for more details.
 - run `main.py` to start backtesting. See `config.py` for configuration. Output `.logs` files.
+
+- (optional) run `data/data_preprocessor.py` to view historical data. see README.md in `data` folder for more details.
