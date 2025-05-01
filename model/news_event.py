@@ -19,10 +19,9 @@ class NewsEvent(NamedTuple):
         return NewsEvent(
             title=data.get("title"),
             time=timestamp,
-            link=data.get("link"),
-            url=data.get("url"),
+            url=data.get("url") or data.get("link"),
             suggestions=data.get("suggestions"),
-            message=data.get("message"),
-            user=data.get("user"),
+            message=data.get("message"), # for login ws message only
+            user=data.get("user"), # for login ws message only
             datetime = format_time(timestamp)
         )

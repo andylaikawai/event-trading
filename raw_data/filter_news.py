@@ -25,6 +25,6 @@ if __name__ == "__main__":
     print(f"Filtered news count: {len(filtered_news)}")
 
     with open(f"raw_news_{from_date}_{to_date}.json", "w") as file:
-        json.dump(filtered_news, file)
+        json.dump(filtered_news, file, indent=4)
 
 
