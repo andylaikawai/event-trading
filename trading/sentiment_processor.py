@@ -4,7 +4,8 @@ from typing import Union, Optional, Tuple
 from backtest.back_test import paper_trade
 from config import IS_BACKTEST_MODE
 from trading.trade_executor import live_trade
-from type.type import Sentiment, Candles, Candle
+from model.candles import Candles, Candle
+from model.sentiment import Sentiment
 
 
 def execute_trade_based_on_sentiment(symbol: str, sentiment, candle: Candle, performance_candles) -> Optional[float]:

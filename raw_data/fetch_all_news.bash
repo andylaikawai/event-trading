@@ -1,1 +1,0 @@
-curl https://news.treeofalpha.com/api/allNews > all_news.json

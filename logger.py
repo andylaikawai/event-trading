@@ -1,13 +1,18 @@
 import logging
+import os
 import time
 
 from config import LOG_LEVEL
-from type.news_event import NewsEvent
+from model.news_event import NewsEvent
 from utils.util import format_time
 
 
 def setup_logger():
-    log_file = f'logs/ws_messages_{time.strftime("%Y%m%d_%H%M%S")}.log'
+    log_dir = '.logs'
+    # Create the .logs directory if it doesn't exist
+    os.makedirs(log_dir, exist_ok=True)
+
+    log_file = f'{log_dir}/ws_messages_{time.strftime("%Y%m%d_%H%M%S")}.log'
     logging.basicConfig(
         filename=log_file,
         filemode='w',
@@ -16,13 +21,13 @@ def setup_logger():
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
-    # FileHandler to write logs to a file
+    # FileHandler to write .logs to a file
     file_handler = logging.FileHandler(log_file, mode='w')
     file_handler.setLevel(LOG_LEVEL)
     file_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
     logging.getLogger().addHandler(file_handler)
 
-    # Add a StreamHandler to flush logs immediately
+    # Add a StreamHandler to flush .logs immediately
     handler = logging.StreamHandler()
     handler.setLevel(LOG_LEVEL)
     handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))

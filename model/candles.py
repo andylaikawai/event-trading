@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import NamedTuple, List
 
 from utils.util import format_time
@@ -27,8 +26,3 @@ class Candle(NamedTuple):
         )
 
 Candles = List[Candle]
-
-class Sentiment(Enum):
-    POSITIVE = "Positive"
-    NEGATIVE = "Negative"
-    NEUTRAL = "Neutral"

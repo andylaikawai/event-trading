@@ -3,10 +3,11 @@ from functools import reduce
 from typing import Tuple, Optional
 
 from trading.sentiment_processor import execute_trade_based_on_sentiment
-from type.news_event import NewsEvent
+from model.news_event import NewsEvent
 from config import MAX_OBSERVATION_PERIOD, MAX_HOLDING_PERIOD, LOOK_BACK_PERIOD
 from trading.exchange import exchange
-from type.type import Candles, Candle, Sentiment
+from model.candles import Candles, Candle
+from model.sentiment import Sentiment
 from utils.util import min_to_ms
 
 def analyze_sentiment(news_event: NewsEvent):

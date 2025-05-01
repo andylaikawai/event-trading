@@ -2,20 +2,21 @@ import json
 import logging
 from typing import List, Dict
 
-from config import STARTING_CAPITAL, TAKE_PROFIT, STOP_LOSS
-from type.news_event import NewsEvent
-from type.type import Sentiment, Candle, Candles
+from config import STARTING_CAPITAL, TAKE_PROFIT, STOP_LOSS, RAW_NEWS_FILE
+from model.news_event import NewsEvent
+from model.candles import Candle, Candles
+from model.sentiment import Sentiment
 from utils.util import round_to_2dp
 
 MAX_NUMBER_OF_TRADES = 500
 
-file_path = 'backtest/news_data_20250319-0418.json'
+
 current_capital = STARTING_CAPITAL
 trades: List[Dict] = []
 
 
 def load_historical_news() -> [Dict]:
-    with open(file_path, 'r') as file:
+    with open(RAW_NEWS_FILE, 'r') as file:
         return json.load(file)
 
 

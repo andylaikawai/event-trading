@@ -1,7 +1,9 @@
 import logging
 
 from trading.exchange import exchange
-from type.type import Sentiment, Candles
+from model.candles import Candles
+from model.sentiment import Sentiment
+
 
 # FIXME 3 args
 def live_trade(symbol: str, trade_amount: float, sentiment: Sentiment, candles: Candles):

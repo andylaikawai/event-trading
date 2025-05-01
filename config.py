@@ -1,7 +1,6 @@
-# config.py
 import logging
 
-IS_BACKTEST_MODE = True  # Set this to True to enable backtesting
+# Logging Configuration
 LOG_LEVEL = logging.INFO
 DATE_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -18,10 +17,15 @@ KUCOIN_SECRET = 'YOUR_KUCOIN_SECRET'
 KUCOIN_PASSPHRASE = 'YOUR_KUCOIN_API_PASSPHRASE'
 
 
-# Trading Configuration
+# Trading Bot Configuration
 STARTING_CAPITAL = 1000
 MAX_HOLDING_PERIOD = 30  # minutes
 MAX_OBSERVATION_PERIOD = 3 # minutes
 LOOK_BACK_PERIOD = 3 # minutes
 TAKE_PROFIT = 0.05
 STOP_LOSS = -0.01
+
+
+# Backtesting Configuration
+IS_BACKTEST_MODE = True  # Set this to True to enable backtesting
+RAW_NEWS_FILE = 'news_data/raw_news_20250301_20250401.json'

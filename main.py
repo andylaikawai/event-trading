@@ -2,8 +2,8 @@ import time
 
 from backtest.back_test import load_historical_news, run_backtest
 from config import IS_BACKTEST_MODE
-from websocket_handler import init_connections
-from message_handler import on_message
+from websocket.websocket_handler import init_connections
+from websocket.message_handler import on_message
 from logger import setup_logger
 
 # Set up the logger only once in the main entry point

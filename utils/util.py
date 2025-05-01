@@ -1,10 +1,10 @@
 from datetime import datetime
 
 
-def format_time(timestamp_ms):
-    return datetime.fromtimestamp(timestamp_ms / 1000).strftime('%Y-%m-%d %H:%M:%S')
+def format_time(timestamp_ms: int, date_time_format: str = '%Y-%m-%d %H:%M:%S') -> str:
+    return datetime.fromtimestamp(timestamp_ms / 1000).strftime(date_time_format)
 
-def parse_datetime_to_timestamp(date: str, date_time_format: str = '%Y-%m-%d') -> int:
+def parse_datetime_to_timestamp(date: str, date_time_format: str = '%Y%m%d') -> int:
     return int(datetime.strptime(date, date_time_format).timestamp() * 1000)
 
 def min_to_ms(minutes: int) -> int:

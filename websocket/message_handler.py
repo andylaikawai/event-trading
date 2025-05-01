@@ -2,8 +2,8 @@ import json
 import logging
 
 from logger import display_news, display_login_message
-from sentiment_analysis import analyze_sentiment
-from type.news_event import NewsEvent
+from trading.sentiment_analysis import analyze_sentiment
+from model.news_event import NewsEvent
 
 
 def on_message(socket, message):
