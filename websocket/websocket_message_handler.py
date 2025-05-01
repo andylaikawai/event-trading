@@ -2,7 +2,6 @@ import json
 import logging
 
 from logger import display_news, display_login_message
-from trading.sentiment_analysis import analyze_sentiment
 from model.news_event import NewsEvent
 
 
@@ -15,7 +14,8 @@ def on_message(socket, message):
 
         if news_event.title:
             display_news(news_event)
-            analyze_sentiment(news_event)
+            # TODO
+            # analyze_sentiment(news_event)
         else:
             display_login_message(news_event)
 

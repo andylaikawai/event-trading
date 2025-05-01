@@ -6,6 +6,7 @@ from data.scripts.data_config import FROM_DATE, TO_DATE, COIN, PROCESSED_DATA_OU
 from data.scripts.fetch_candles import get_candles
 from data.scripts.filter_news import get_filtered_news
 from model.candles import Candles
+from model.news_event import NewsEvent, HistoricalNewsEvent
 from utils.util import parse_datetime_to_timestamp, min_to_ms, read_from_cache_or_fetch
 
 
@@ -24,7 +25,7 @@ def preprocess_news_data():
             timestamp = news.get("time")
             previous_candles, observation_candles, performance_candles = _get_relevant_candles(all_candles, timestamp)
 
-            # TODO maybe model the data for challenge purpose
+            # TODO maybe model the data specifically for challenge purpose
             processed_news.append({
                 "title": news.get("title"),
                 "time": news.get("time"),
@@ -32,7 +33,7 @@ def preprocess_news_data():
                 "source": news.get("source"),
                 "previous_candles": previous_candles,
                 "observation_candles": observation_candles,
-                "performance_candles": performance_candles, # FIXME probably just need to last candle
+                "performance_candle": performance_candles[-1]
             })
 
     print(f"Processed news count: {len(processed_news)}")
@@ -40,7 +41,7 @@ def preprocess_news_data():
     return processed_news
 
 def get_preprocessed_news():
-    read_from_cache_or_fetch(PROCESSED_DATA_OUTPUT_FILE, preprocess_news_data)
+    return read_from_cache_or_fetch(PROCESSED_DATA_OUTPUT_FILE, preprocess_news_data, indent=4)
 
 
 

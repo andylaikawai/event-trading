@@ -1,9 +1,6 @@
-from functools import reduce
-from typing import Union, Optional, Tuple
+from typing import Union, Optional
 
 from backtest.back_test import paper_trade
-from config import IS_BACKTEST_MODE
-from trading.trade_executor import live_trade
 from model.candles import Candles, Candle
 from model.sentiment import Sentiment
 
@@ -14,8 +11,7 @@ def execute_trade_based_on_sentiment(symbol: str, sentiment, candle: Candle, per
 
 
 def _make_trade(symbol: str, sentiment: Sentiment, candle: Candle, performance_candles: Candles):
-    trade_executor = paper_trade if IS_BACKTEST_MODE else live_trade
-    trade_executor(symbol, sentiment, candle, performance_candles)
+    paper_trade(symbol, sentiment, candle, performance_candles)
 
 
 def _detect_price_movement(candles: Candles) -> Union[float, None]:

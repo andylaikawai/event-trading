@@ -15,20 +15,13 @@ current_capital = STARTING_CAPITAL
 trades: List[Dict] = []
 
 
-def load_historical_news() -> [Dict]:
-    with open(RAW_NEWS_FILE, 'r') as file:
-        return json.load(file)
-
-
 def run_backtest(news_data, on_historical_message):
     """Run backtesting using historical news data."""
-    for news_event_data in news_data:
+    for news_event in news_data:
         if len(trades) >= MAX_NUMBER_OF_TRADES:
             logging.info(f"Reached the maximum number of trades: {MAX_NUMBER_OF_TRADES}")
             break
-        news_event = NewsEvent.from_dict(news_event_data)
-        message = json.dumps(news_event._asdict())
-        on_historical_message(None, message)
+        on_historical_message(news_event)
     _evaluate_result()
 
 
@@ -68,7 +61,7 @@ def _get_exit_candle(trade: Dict, candles: Candles, exit_time: int) -> Candle:
 
     for candle in candles:
         if candle.timestamp >= exit_time:
-            logging.info(f"[TRADE] Exit time")
+            logging.info(f"[TRADE] Exit time reached")
             return candle
 
         gain = (candle.close - entry_price) / entry_price
@@ -83,7 +76,7 @@ def _get_exit_candle(trade: Dict, candles: Candles, exit_time: int) -> Candle:
 
     return candles[-1]
 
-def _exit_trade(trade: Dict, candles: Candles, minutes: int = 29):
+def _exit_trade(trade: Dict, candles: Candles, minutes: int = 30):
     global current_capital
 
     exit_time = trade['entry_time'] + 1000 * 60 * minutes

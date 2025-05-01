@@ -1,27 +1,24 @@
 import logging
 from functools import reduce
 
-from trading.sentiment_processor import execute_trade_based_on_sentiment
-from model.news_event import NewsEvent
-from trading.exchange import fetch_relevant_candles
+from backtest.sentiment_processor import execute_trade_based_on_sentiment
+from data.scripts.data_config import COIN
 from model.candles import Candles
+from model.news_event import NewsEvent, HistoricalNewsEvent
 from model.sentiment import Sentiment
 
 
-def analyze_sentiment(news_event: NewsEvent):
-    symbol = _process_suggestions(news_event)
-    if not symbol:
-        return
+def analyze_sentiment(news_event: HistoricalNewsEvent):
+    sentiment = _get_sentiment(COIN, news_event.previous_candles, news_event.observation_candles)
 
-    timestamp = news_event.time
-    
-    previous_candle, observation_candles, performance_candles = fetch_relevant_candles(symbol, timestamp)
-    if previous_candle is None or observation_candles is None or performance_candles is None:
-        return
+    # FIXME it is unfair to analyse future data and trade at an older timestamp, this is for illustration purpose only
+    execution_candle = news_event.observation_candles[0]
+    # execution_candle = news_event.observation_candles[-1]
 
-    sentiment = _get_sentiment(symbol, previous_candle, observation_candles)
+    # FIXME below also support multiple performance candles to trigger take profit/stop loss
+    market_moved = execute_trade_based_on_sentiment(COIN, sentiment, execution_candle, [news_event.performance_candle])
 
-    market_moved = execute_trade_based_on_sentiment(symbol, sentiment, observation_candles[-1], performance_candles)
+    # TODO identify missed opportunities
     # if market_moved:
     #     source = news_event.link or news_event.url or "-"
     #     logging.info(f"{news_event.title}")
@@ -49,13 +46,14 @@ def _get_sentiment(symbol: str, previous_candles: Candles, observation_candles: 
     current_close = current_candle.close
     observed_volume_avg = _get_average_volume(observation_candles)
 
-    volume_spiked = observed_volume_avg >= previous_volume_avg * 10 # TODO parametized
+    # TODO toy example below to detect volume spike / price movement.
+    volume_spiked = observed_volume_avg >= previous_volume_avg * 3
 
     if volume_spiked:
-        if current_close > previous_close * 1.001:
+        if current_close > previous_close * 1.002:
             logging.debug(f"[TRADE] Positive sentiment detected for {symbol}.")
             return Sentiment.POSITIVE
-        elif current_close < previous_close * 0.999:
+        elif current_close < previous_close * 0.998:
             logging.debug(f"[TRADE] Negative sentiment detected for {symbol}.")
             return Sentiment.NEGATIVE
     return Sentiment.NEUTRAL

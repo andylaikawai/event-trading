@@ -18,7 +18,7 @@ def round_to_2dp(*values):
     return [round(value, 2) for value in values]
 
 
-def read_from_cache_or_fetch(file_path: str, fetch_function, *args):
+def read_from_cache_or_fetch(file_path: str, fetch_function, *args, indent=None):
     try:
         with open(file_path, 'r') as file:
             return json.load(file)
@@ -28,5 +28,5 @@ def read_from_cache_or_fetch(file_path: str, fetch_function, *args):
         if not data:
             raise ValueError(f"Failed to fetch data by {fetch_function.__name__} with arguments: {args}")
         with open(file_path, 'w') as file:
-            json.dump(data, file)
+            json.dump(data, file, indent=indent)
         return data
