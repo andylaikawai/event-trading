@@ -28,4 +28,4 @@ STOP_LOSS = -0.01
 
 # Backtesting Configuration
 IS_BACKTEST_MODE = True  # Set this to True to enable backtesting
-RAW_NEWS_FILE = 'raw_data/raw_news_20250301_20250401.json'
+RAW_NEWS_FILE = 'data/raw_news_20250301_20250401.json'

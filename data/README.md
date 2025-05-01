@@ -1,16 +1,15 @@
 # Usage
 
-Run `data_preprocess.py` to preprocess raw news data downloaded and stored in `raw_data` directory.
+Run `scripts/data_preprocess.py` to preprocess raw news data downloaded and stored in `data` directory.
 
 ## Input
 
-See scripts input section, i.e.:
+See `data_config.py`, mainly to specify:
 
 ```
 FROM_DATE
 TO_DATE
 COIN
-RAW_DATA_INPUT_FILE
 ``` 
 
 ## Output
@@ -21,7 +20,8 @@ For each news item, given the time of the news, the script will populate:
 
 - necessary fields for the news item (e.g. title, time, url, source)
 - previous candles: 3 minutes prior to the news timestamp, for sentiment analysis purpose
-- observation candles: 3 minutes after the news timestamp, for sentiment analysis purpose (e.g. observe whether the price / volume changes after the news)
+- observation candles: 3 minutes after the news timestamp, for sentiment analysis purpose (e.g. observe whether the
+  price / volume changes after the news)
 - performance candles: 30 minutes after the news timestamp, for performance evaluation purpose only. Should not be used
   for sentiment analysis.
 

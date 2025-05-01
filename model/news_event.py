@@ -6,7 +6,6 @@ from utils.util import format_time
 class NewsEvent(NamedTuple):
     title: Optional[str]
     time: int
-    link: Optional[str]
     url: Optional[str]
     suggestions: Optional[List[dict]]
     message: Optional[str]

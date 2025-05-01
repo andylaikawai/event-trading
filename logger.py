@@ -45,6 +45,6 @@ def display_login_message(news_event: NewsEvent):
 def display_news(news_event: NewsEvent):
     timestamp_ms = news_event.time
     timestamp = format_time(timestamp_ms)
-    source = news_event.link or news_event.url or "-"
+    source = news_event.url or "-"
 
     logging.debug(f"{timestamp} - Headline: '{news_event.title}' | Source: '{source}'")
