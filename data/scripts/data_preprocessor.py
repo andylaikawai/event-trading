@@ -1,4 +1,3 @@
-import json
 from typing import Optional, Tuple
 
 from config import MAX_OBSERVATION_PERIOD, MAX_HOLDING_PERIOD
@@ -6,7 +5,6 @@ from data.scripts.data_config import FROM_DATE, TO_DATE, COIN, PROCESSED_DATA_OU
 from data.scripts.fetch_candles import get_candles
 from data.scripts.filter_news import get_filtered_news
 from model.candles import Candles
-from model.news_event import NewsEvent, HistoricalNewsEvent
 from utils.util import parse_datetime_to_timestamp, min_to_ms, read_from_cache_or_fetch
 
 

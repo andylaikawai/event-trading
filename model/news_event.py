@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import NamedTuple, List, Optional
+from typing import List, Optional
 
 from model.candles import Candles, Candle
 from utils.util import format_time

@@ -1,9 +1,7 @@
-import json
 import logging
 from typing import List, Dict
 
-from config import STARTING_CAPITAL, TAKE_PROFIT, STOP_LOSS, RAW_NEWS_FILE
-from model.news_event import NewsEvent
+from config import STARTING_CAPITAL, TAKE_PROFIT, STOP_LOSS
 from model.candles import Candle, Candles
 from model.sentiment import Sentiment
 from utils.util import round_to_2dp

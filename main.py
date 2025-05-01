@@ -4,9 +4,9 @@ from backtest.back_test import run_backtest
 from backtest.historical_news_event_handler import on_historical_message
 from config import IS_BACKTEST_MODE
 from data.scripts.data_preprocessor import get_preprocessed_news
+from logger import setup_logger
 from websocket.websocket import init_connections
 from websocket.websocket_message_handler import on_message
-from logger import setup_logger
 
 # Set up the logger only once in the main entry point
 setup_logger()

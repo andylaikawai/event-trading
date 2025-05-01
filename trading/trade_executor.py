@@ -1,8 +1,8 @@
 import logging
 
-from trading.exchange import exchange
 from model.candles import Candles
 from model.sentiment import Sentiment
+from trading.exchange import exchange
 
 
 # FIXME 3 args

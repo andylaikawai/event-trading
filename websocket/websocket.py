@@ -1,8 +1,9 @@
 import threading
 import time
-import websocket
 
+import websocket
 from config import TREE_NEWS_API_KEY, WS_URLS
+
 
 def init_connections(on_message):
     threads = []

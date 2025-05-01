@@ -1,8 +1,8 @@
 import logging
 
+from backtest.sentiment_analysis import analyze_sentiment
 from logger import display_news
 from model.news_event import HistoricalNewsEvent
-from backtest.sentiment_analysis import analyze_sentiment
 
 
 def on_historical_message(message):
