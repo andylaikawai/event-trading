@@ -1,8 +1,11 @@
-import time
+from datetime import datetime
 
 
 def format_time(timestamp_ms):
-    return time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(1744971600686 / 1000))
+    return datetime.fromtimestamp(timestamp_ms / 1000).strftime('%Y-%m-%d %H:%M:%S')
+
+def parse_datetime_to_timestamp(date: str, date_time_format: str = '%Y-%m-%d') -> int:
+    return int(datetime.strptime(date, date_time_format).timestamp() * 1000)
 
 def min_to_ms(minutes: int) -> int:
     return minutes * 60 * 1000

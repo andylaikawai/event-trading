@@ -1,5 +1,2 @@
-# TODO
-
-1. Stop loss
-2. Take profit
-3. 
+# Tech Stack
+- Python 3.9.6

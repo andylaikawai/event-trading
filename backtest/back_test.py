@@ -67,17 +67,17 @@ def _get_exit_candle(trade: Dict, candles: Candles, exit_time: int) -> Candle:
 
     for candle in candles:
         if candle.timestamp >= exit_time:
-            logging.debug(f"[TRADE] Exited trade: {trade}")
+            logging.info(f"[TRADE] Exit time")
             return candle
 
-        price_change = (candle.close - entry_price) / entry_price
+        gain = (candle.close - entry_price) / entry_price
         if direction == Sentiment.NEGATIVE.name:
-            price_change *= -1
-        if price_change >= TAKE_PROFIT:
-            logging.debug(f"[TRADE] Exited trade at take profit: {trade}")
+            gain *= -1
+        if gain >= TAKE_PROFIT:
+            logging.info(f"[TRADE] Take profit")
             return candle
-        if price_change <= STOP_LOSS:
-            logging.debug(f"[TRADE] Exited trade at stop loss: {trade}")
+        if gain <= STOP_LOSS:
+            logging.info(f"[TRADE] Stop loss")
             return candle
 
     return candles[-1]
@@ -96,6 +96,7 @@ def _exit_trade(trade: Dict, candles: Candles, minutes: int = 29):
     trade['price_change_percent'] = round_to_2dp(price_change_percent)[0]
     trade['pnl'] = round_to_2dp(_calculate_pnl(trade))[0]
     current_capital += trade['pnl']
+    logging.info(f"[TRADE]: {trade}")
     _log_performance()
 
 
@@ -113,10 +114,10 @@ def _log_performance():
     win_ratio = _get_win_ratio()
     [formatted_total_pnl, formatted_pnl, formatted_win_ratio] = round_to_2dp(total_pnl, pnl_percentage, win_ratio)
 
-    logging.info(f"[Trade] Total trades made: {len(trades)}")
-    logging.info(f"[Trade] Total PnL: {formatted_total_pnl}")
-    logging.info(f"[Trade] Win Ratio: {formatted_win_ratio}%")
-    logging.info(f"[Trade] Performance: {formatted_pnl}%")
+    logging.info(f"[TRADE] Total trades made: {len(trades)}")
+    logging.info(f"[TRADE] Total PnL: {formatted_total_pnl}")
+    logging.info(f"[TRADE] Win Ratio: {formatted_win_ratio}%")
+    logging.info(f"[TRADE] Performance: {formatted_pnl}%")
 
 
 def _evaluate_result():
