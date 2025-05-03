@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, List
+from typing import Optional
 
 from config import MAX_OBSERVATION_PERIOD, MAX_HOLDING_PERIOD, LOOK_BACK_PERIOD
 from data.scripts.data_config import FROM_DATE, TO_DATE, COIN, PROCESSED_DATA_OUTPUT_FILE
@@ -9,7 +9,7 @@ from model.news_event import HistoricalNewsEvent
 from utils.util import parse_datetime_to_timestamp, min_to_ms, read_from_cache_or_fetch
 
 
-def preprocess_news_data() -> List[HistoricalNewsEvent]:
+def preprocess_news_data() -> list[HistoricalNewsEvent]:
     raw_news = get_filtered_news()
 
     # Get all candles within time range
@@ -40,7 +40,7 @@ def get_preprocessed_news():
     return read_from_cache_or_fetch(PROCESSED_DATA_OUTPUT_FILE, preprocess_news_data, indent=4)
 
 
-def _get_relevant_candles(candles: Candles, timestamp: int) -> Tuple[
+def _get_relevant_candles(candles: Candles, timestamp: int) -> tuple[
     Optional[Candles], Optional[Candles], Optional[Candles]]:
     observe_since = timestamp - min_to_ms(LOOK_BACK_PERIOD)
     observe_until = timestamp + min_to_ms(MAX_OBSERVATION_PERIOD)

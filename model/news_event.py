@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -11,7 +11,7 @@ class NewsEvent(BaseModel):
     timestamp: int
     url: Optional[str]
     source: Optional[str]
-    suggestions: Optional[List[dict]]
+    suggestions: Optional[list[dict]]
     datetime: str
 
     @classmethod

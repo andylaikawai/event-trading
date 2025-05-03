@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel
 
 from utils.util import format_time
@@ -15,7 +13,7 @@ class Candle(BaseModel):
     datetime: str
 
     @classmethod
-    def from_ohlcv(cls, ohlcv: List[float]):
+    def from_ohlcv(cls, ohlcv: list[float]):
         timestamp = int(ohlcv[0])
         return cls(
             timestamp=timestamp,
@@ -27,4 +25,4 @@ class Candle(BaseModel):
             datetime=format_time(timestamp)
         )
 
-Candles = List[Candle]
+Candles = list[Candle]

@@ -1,5 +1,4 @@
 import logging
-from typing import List, Dict
 
 from config import STARTING_CAPITAL, TAKE_PROFIT, STOP_LOSS
 from model.candles import Candle, Candles
@@ -10,7 +9,7 @@ MAX_NUMBER_OF_TRADES = 500
 
 
 current_capital = STARTING_CAPITAL
-trades: List[Dict] = []
+trades: list[dict] = []
 
 
 def run_backtest(news_data, on_historical_message):
@@ -53,7 +52,7 @@ def paper_trade(symbol: str, sentiment: Sentiment, candle: Candle, performance_c
     # Schedule exit after 30 minutes
     _exit_trade(trade, performance_candles)
 
-def _get_exit_candle(trade: Dict, candles: Candles, exit_time: int) -> Candle:
+def _get_exit_candle(trade: dict, candles: Candles, exit_time: int) -> Candle:
     entry_price = trade['entry_price']
     direction = trade['direction']
 
@@ -74,7 +73,7 @@ def _get_exit_candle(trade: Dict, candles: Candles, exit_time: int) -> Candle:
 
     return candles[-1]
 
-def _exit_trade(trade: Dict, candles: Candles, minutes: int = 30):
+def _exit_trade(trade: dict, candles: Candles, minutes: int = 30):
     global current_capital
 
     exit_time = trade['entry_time'] + 1000 * 60 * minutes
@@ -92,7 +91,7 @@ def _exit_trade(trade: Dict, candles: Candles, minutes: int = 30):
     _log_performance()
 
 
-def _calculate_pnl(trade: Dict) -> float:
+def _calculate_pnl(trade: dict) -> float:
     if trade['direction'] == Sentiment.POSITIVE.name:
         return (trade['exit_price'] - trade['entry_price']) * trade['amount']
     elif trade['direction'] == Sentiment.NEGATIVE.name:
