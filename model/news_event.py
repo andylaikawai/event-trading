@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 from typing import List, Optional
+
+from pydantic import BaseModel
+
 from model.candles import Candles, Candle
 from utils.util import format_time
 
@@ -14,7 +16,7 @@ class NewsEvent(BaseModel):
 
     @classmethod
     def from_dict(cls, data: dict):
-        timestamp = data.get("time", 0)
+        timestamp = data.get("time")
         return cls(
             title=data.get("title"),
             timestamp=timestamp,
