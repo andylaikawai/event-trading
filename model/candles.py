@@ -1,9 +1,11 @@
-from typing import NamedTuple, List
+from dataclasses import dataclass
+from typing import List
 
 from utils.util import format_time
 
 
-class Candle(NamedTuple):
+@dataclass
+class Candle():
     timestamp: int
     open: float
     high: float
@@ -24,5 +26,15 @@ class Candle(NamedTuple):
             volume=ohlcv[5],
             datetime=format_time(timestamp)
         )
+
+    def to_dict(self):
+        return {
+            "timestamp": self.timestamp,
+            "open": self.open,
+            "high": self.high,
+            "low": self.low,
+            "close": self.close,
+            "volume": self.volume
+        }
 
 Candles = List[Candle]

@@ -1,6 +1,6 @@
 from typing import Optional, Tuple
 
-from config import MAX_OBSERVATION_PERIOD, MAX_HOLDING_PERIOD
+from config import MAX_OBSERVATION_PERIOD, MAX_HOLDING_PERIOD, LOOK_BACK_PERIOD
 from data.scripts.data_config import FROM_DATE, TO_DATE, COIN, PROCESSED_DATA_OUTPUT_FILE
 from data.scripts.fetch_candles import get_candles
 from data.scripts.filter_news import get_filtered_news
@@ -21,7 +21,9 @@ def preprocess_news_data():
     for news in raw_news:
         if any(suggestion.get("coin") == COIN for suggestion in news.get("suggestions", [])):
             timestamp = news.get("time")
-            previous_candles, observation_candles, performance_candles = _get_relevant_candles(all_candles, timestamp)
+            [previous_candles, observation_candles, performance_candles] = [
+                [candle.to_dict() for candle in candles] for candles in _get_relevant_candles(all_candles, timestamp)
+            ]
 
             # TODO maybe model the data specifically for challenge purpose
             processed_news.append({
@@ -38,13 +40,14 @@ def preprocess_news_data():
 
     return processed_news
 
+
 def get_preprocessed_news():
     return read_from_cache_or_fetch(PROCESSED_DATA_OUTPUT_FILE, preprocess_news_data, indent=4)
 
 
-
-def _get_relevant_candles(candles: Candles, timestamp: int) -> Tuple[Optional[Candles], Optional[Candles], Optional[Candles]]:
-    observe_since = timestamp - min_to_ms(MAX_OBSERVATION_PERIOD)
+def _get_relevant_candles(candles: Candles, timestamp: int) -> Tuple[
+    Optional[Candles], Optional[Candles], Optional[Candles]]:
+    observe_since = timestamp - min_to_ms(LOOK_BACK_PERIOD)
     observe_until = timestamp + min_to_ms(MAX_OBSERVATION_PERIOD)
     hold_until = timestamp + min_to_ms(MAX_HOLDING_PERIOD)
 
@@ -52,6 +55,7 @@ def _get_relevant_candles(candles: Candles, timestamp: int) -> Tuple[Optional[Ca
     observation_candles = [candle for candle in candles if timestamp <= candle.timestamp <= observe_until]
     performance_candles = [candle for candle in candles if timestamp <= candle.timestamp <= hold_until]
     return previous_candles, observation_candles, performance_candles
+
 
 if __name__ == "__main__":
     get_preprocessed_news()
