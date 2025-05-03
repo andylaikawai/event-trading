@@ -9,7 +9,7 @@ from model.news_event import HistoricalNewsEvent
 from utils.util import parse_datetime_to_timestamp, min_to_ms, read_from_cache_or_fetch
 
 
-def preprocess_news_data() -> list[HistoricalNewsEvent]:
+def preprocess_news_data() -> list[dict]:
     raw_news = get_filtered_news()
 
     # Get all candles within time range
@@ -22,22 +22,28 @@ def preprocess_news_data() -> list[HistoricalNewsEvent]:
     for news in raw_news:
         if any(suggestion.get("coin") == COIN for suggestion in news.get("suggestions", [])):
             timestamp = news.get("time")
-            previous_candles, observation_candles, performance_candles = _get_relevant_candles(all_candles, timestamp)
+            [previous_candles, observation_candles, performance_candles] = [
+                [candle.model_dump() for candle in candles] for candles in _get_relevant_candles(all_candles, timestamp)
+            ]
 
-            processed_news.append(HistoricalNewsEvent.from_dict({
-                **news,
+            processed_news.append({
+                "title": news.get("title"),
+                "time": news.get("time"),
+                "url": news.get("url"),
+                "source": news.get("source"),
                 "previous_candles": previous_candles,
                 "observation_candles": observation_candles,
                 "performance_candle": performance_candles[-1]
-            }).model_dump(exclude={'suggestions'}))
+            })
 
     print(f"Processed news count: {len(processed_news)}")
 
     return processed_news
 
 
-def get_preprocessed_news():
-    return read_from_cache_or_fetch(PROCESSED_DATA_OUTPUT_FILE, preprocess_news_data, indent=4)
+def get_preprocessed_news() -> list[HistoricalNewsEvent]:
+    raw_news = read_from_cache_or_fetch(PROCESSED_DATA_OUTPUT_FILE, preprocess_news_data, indent=4)
+    return [HistoricalNewsEvent.from_dict(raw_news) for raw_news in raw_news]
 
 
 def _get_relevant_candles(candles: Candles, timestamp: int) -> tuple[

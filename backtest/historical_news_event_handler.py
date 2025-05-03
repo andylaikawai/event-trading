@@ -5,9 +5,8 @@ from logger import display_news
 from model.news_event import HistoricalNewsEvent
 
 
-def on_historical_message(message):
+def on_historical_news_event(news_event: HistoricalNewsEvent):
     try:
-        news_event = HistoricalNewsEvent.from_dict(message)
         display_news(news_event)
         analyze_sentiment(news_event)
 
