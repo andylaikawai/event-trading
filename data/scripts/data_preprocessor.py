@@ -1,7 +1,6 @@
 from typing import Optional
 
-from config import MAX_OBSERVATION_PERIOD, MAX_HOLDING_PERIOD, LOOK_BACK_PERIOD
-from data.scripts.data_config import FROM_DATE, TO_DATE, COIN, PROCESSED_DATA_OUTPUT_FILE
+from config import MAX_OBSERVATION_PERIOD, MAX_HOLDING_PERIOD, LOOK_BACK_PERIOD, FROM_DATE, TO_DATE, SYMBOL, PROCESSED_DATA_OUTPUT_FILE
 from data.scripts.fetch_candles import get_candles
 from data.scripts.filter_news import get_filtered_news
 from model.candles import Candles
@@ -20,7 +19,7 @@ def preprocess_news_data() -> list[dict]:
     # Project specified keys, filter by coin, and populate relevant candles
     processed_news = []
     for news in raw_news:
-        if any(suggestion.get("coin") == COIN for suggestion in news.get("suggestions", [])):
+        if any(suggestion.get("coin") == SYMBOL for suggestion in news.get("suggestions", [])):
             timestamp = news.get("time")
             [previous_candles, observation_candles, performance_candles] = [
                 [candle.model_dump() for candle in candles] for candles in _get_relevant_candles(all_candles, timestamp)
@@ -33,7 +32,7 @@ def preprocess_news_data() -> list[dict]:
                 "source": news.get("source"),
                 "previous_candles": previous_candles,
                 "observation_candles": observation_candles,
-                "performance_candle": performance_candles[-1]
+                "performance_candles": performance_candles
             })
 
     print(f"Processed news count: {len(processed_news)}")

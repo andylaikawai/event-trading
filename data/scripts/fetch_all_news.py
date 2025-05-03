@@ -1,6 +1,6 @@
 import requests
 
-from data.scripts.data_config import TREE_ALL_NEWS_API
+from config import TREE_ALL_NEWS_API
 from utils.util import read_from_cache_or_fetch
 
 OUTPUT_FILE = "data/raw_all_news.json"

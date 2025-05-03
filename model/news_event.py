@@ -29,7 +29,7 @@ class NewsEvent(BaseModel):
 class HistoricalNewsEvent(NewsEvent):
     previous_candles: Candles
     observation_candles: Candles
-    performance_candle: Optional[Candle]
+    performance_candles: Candles
 
     @classmethod
     def from_dict(cls, data: dict):
@@ -43,5 +43,5 @@ class HistoricalNewsEvent(NewsEvent):
             datetime=base_event.datetime,
             previous_candles=data.get("previous_candles"),
             observation_candles=data.get("observation_candles"),
-            performance_candle=data.get("performance_candle")
+            performance_candles=data.get("performance_candles")
         )

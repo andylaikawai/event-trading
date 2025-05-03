@@ -2,21 +2,20 @@ import logging
 from functools import reduce
 
 from backtest.sentiment_processor import execute_trade_based_on_sentiment
-from data.scripts.data_config import COIN
+from config import SYMBOL
 from model.candles import Candles
 from model.news_event import NewsEvent, HistoricalNewsEvent
 from model.sentiment import Sentiment
 
 
 def analyze_sentiment(news_event: HistoricalNewsEvent):
-    sentiment = _get_sentiment(COIN, news_event.previous_candles, news_event.observation_candles)
+    sentiment = _get_sentiment(SYMBOL, news_event.previous_candles, news_event.observation_candles)
 
     # FIXME it is unfair to analyse future data and trade at an older timestamp, this is for illustration purpose only
     execution_candle = news_event.observation_candles[0]
     # execution_candle = news_event.observation_candles[-1]
 
-    # FIXME below also support multiple performance candles to trigger take profit/stop loss
-    market_moved = execute_trade_based_on_sentiment(COIN, sentiment, execution_candle, [news_event.performance_candle])
+    market_moved = execute_trade_based_on_sentiment(SYMBOL, sentiment, execution_candle, news_event.performance_candles)
 
     # TODO identify missed opportunities
     # if market_moved:

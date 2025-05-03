@@ -1,4 +1,4 @@
-from data.scripts.data_config import RAW_FILTERED_NEWS_FILE, FROM_DATE, TO_DATE
+from config import RAW_FILTERED_NEWS_FILE, FROM_DATE, TO_DATE
 from data.scripts.fetch_all_news import get_all_news
 from utils.util import format_time, parse_datetime_to_timestamp, read_from_cache_or_fetch
 

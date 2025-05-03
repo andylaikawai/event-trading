@@ -4,7 +4,7 @@ Run `scripts/data_preprocess.py` to preprocess raw news data downloaded and stor
 
 ## Input
 
-See `data_config.py`, mainly to specify:
+See `config.py`, mainly to specify:
 
 ```
 FROM_DATE

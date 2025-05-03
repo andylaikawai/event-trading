@@ -7,7 +7,6 @@ from utils.util import round_to_2dp
 
 MAX_NUMBER_OF_TRADES = 500
 
-
 current_capital = STARTING_CAPITAL
 trades: list[dict] = []
 
@@ -52,6 +51,7 @@ def paper_trade(symbol: str, sentiment: Sentiment, candle: Candle, performance_c
     # Schedule exit after 30 minutes
     _exit_trade(trade, performance_candles)
 
+
 def _get_exit_candle(trade: dict, candles: Candles, exit_time: int) -> Candle:
     entry_price = trade['entry_price']
     direction = trade['direction']
@@ -72,6 +72,7 @@ def _get_exit_candle(trade: dict, candles: Candles, exit_time: int) -> Candle:
             return candle
 
     return candles[-1]
+
 
 def _exit_trade(trade: dict, candles: Candles, minutes: int = 30):
     global current_capital
