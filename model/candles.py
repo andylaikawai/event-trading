@@ -1,11 +1,9 @@
-from dataclasses import dataclass
+from pydantic import BaseModel
 from typing import List
-
 from utils.util import format_time
 
 
-@dataclass
-class Candle():
+class Candle(BaseModel):
     timestamp: int
     open: float
     high: float
@@ -14,10 +12,10 @@ class Candle():
     volume: float
     datetime: str
 
-    @staticmethod
-    def from_ohlcv(ohlcv):
-        timestamp = ohlcv[0]
-        return Candle(
+    @classmethod
+    def from_ohlcv(cls, ohlcv: List[float]):
+        timestamp = int(ohlcv[0])
+        return cls(
             timestamp=timestamp,
             open=ohlcv[1],
             high=ohlcv[2],
@@ -26,15 +24,5 @@ class Candle():
             volume=ohlcv[5],
             datetime=format_time(timestamp)
         )
-
-    def to_dict(self):
-        return {
-            "timestamp": self.timestamp,
-            "open": self.open,
-            "high": self.high,
-            "low": self.low,
-            "close": self.close,
-            "volume": self.volume
-        }
 
 Candles = List[Candle]

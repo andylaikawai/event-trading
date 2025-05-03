@@ -1,14 +1,15 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 from config import MAX_OBSERVATION_PERIOD, MAX_HOLDING_PERIOD, LOOK_BACK_PERIOD
 from data.scripts.data_config import FROM_DATE, TO_DATE, COIN, PROCESSED_DATA_OUTPUT_FILE
 from data.scripts.fetch_candles import get_candles
 from data.scripts.filter_news import get_filtered_news
 from model.candles import Candles
+from model.news_event import HistoricalNewsEvent
 from utils.util import parse_datetime_to_timestamp, min_to_ms, read_from_cache_or_fetch
 
 
-def preprocess_news_data():
+def preprocess_news_data() -> List[HistoricalNewsEvent]:
     raw_news = get_filtered_news()
 
     # Get all candles within time range
@@ -21,20 +22,14 @@ def preprocess_news_data():
     for news in raw_news:
         if any(suggestion.get("coin") == COIN for suggestion in news.get("suggestions", [])):
             timestamp = news.get("time")
-            [previous_candles, observation_candles, performance_candles] = [
-                [candle.to_dict() for candle in candles] for candles in _get_relevant_candles(all_candles, timestamp)
-            ]
+            previous_candles, observation_candles, performance_candles = _get_relevant_candles(all_candles, timestamp)
 
-            # TODO maybe model the data specifically for challenge purpose
-            processed_news.append({
-                "title": news.get("title"),
-                "time": news.get("time"),
-                "url": news.get("url"),
-                "source": news.get("source"),
+            processed_news.append(HistoricalNewsEvent.from_dict({
+                **news,
                 "previous_candles": previous_candles,
                 "observation_candles": observation_candles,
                 "performance_candle": performance_candles[-1]
-            })
+            }).model_dump(exclude={'suggestions'}))
 
     print(f"Processed news count: {len(processed_news)}")
 

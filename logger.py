@@ -34,16 +34,15 @@ def setup_logger():
     logging.getLogger().addHandler(handler)
 
 
-def display_login_message(news_event: NewsEvent):
-    message = news_event.message
-    username = news_event.user.get("username") if news_event.user else None
+def display_login_message(user: dict, message: str):
+    username = user.get("username") or None
     login_message = message or f"Logged in as {username} successfully\n"
 
     print(f"{login_message}")
     logging.info(f"{login_message}")
 
 def display_news(news_event: NewsEvent):
-    timestamp_ms = news_event.time
+    timestamp_ms = news_event.timestamp
     timestamp = format_time(timestamp_ms)
     source = news_event.url or "-"
 
