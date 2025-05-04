@@ -1,28 +1,15 @@
 import logging
 from functools import reduce
 
-from backtest.sentiment_processor import execute_trade_based_on_sentiment
 from config import SYMBOL
 from model.candles import Candles
 from model.news_event import NewsEvent, HistoricalNewsEvent
 from model.sentiment import Sentiment
 
 
-def analyze_sentiment(news_event: HistoricalNewsEvent):
-    sentiment = _get_sentiment(SYMBOL, news_event.previous_candles, news_event.observation_candles)
+def analyze_sentiment(news_event: HistoricalNewsEvent) -> Sentiment:
+    return _get_sentiment(SYMBOL, news_event.previous_candles, news_event.observation_candles)
 
-    # FIXME it is unfair to analyse future data and trade at an older timestamp, this is for illustration purpose only
-    execution_candle = news_event.observation_candles[0]
-    # execution_candle = news_event.observation_candles[-1]
-
-    market_moved = execute_trade_based_on_sentiment(SYMBOL, sentiment, execution_candle, news_event.performance_candles)
-
-    # TODO identify missed opportunities
-    # if market_moved:
-    #     source = news_event.link or news_event.url or "-"
-    #     logging.info(f"{news_event.title}")
-    #     logging.info(f"[ANALYSIS] Market moved by {market_moved:.2f}% at {news_event.datetime} for news: {source}")
-    return
 
 def _process_suggestions(news_event: NewsEvent):
     suggestions = news_event.suggestions

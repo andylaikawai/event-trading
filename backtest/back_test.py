@@ -1,24 +1,47 @@
 import logging
 
-from config import STARTING_CAPITAL, TAKE_PROFIT, STOP_LOSS
+from backtest.post_trade_analysis import post_trade_analysis
+from backtest.sentiment_analysis import analyze_sentiment
+from config import STARTING_CAPITAL, TAKE_PROFIT, STOP_LOSS, SYMBOL
+from data.scripts.data_preprocessor import get_preprocessed_news
+from logger import display_news
 from model.candles import Candle, Candles
+from model.news_event import HistoricalNewsEvent
 from model.sentiment import Sentiment
 from utils.util import round_to_2dp
 
-MAX_NUMBER_OF_TRADES = 500
+MAX_NUMBER_OF_TRADES = 99999
 
 current_capital = STARTING_CAPITAL
 trades: list[dict] = []
 
 
-def run_backtest(news_data, on_historical_message):
-    """Run backtesting using historical news data."""
+def run_backtest() -> float:
+    news_data = get_preprocessed_news()
     for news_event in news_data:
         if len(trades) >= MAX_NUMBER_OF_TRADES:
             logging.info(f"Reached the maximum number of trades: {MAX_NUMBER_OF_TRADES}")
             break
-        on_historical_message(news_event)
-    _evaluate_result()
+        _on_historical_news_event(news_event)
+    _log_top_trades()
+    return _get_roi()
+
+
+def _on_historical_news_event(news_event: HistoricalNewsEvent):
+    try:
+        display_news(news_event)
+        sentiment = analyze_sentiment(news_event)
+
+        # FIXME it is unfair to analyse future data and trade at an older timestamp, this is for illustration purpose only
+        execution_candle = news_event.observation_candles[0]
+        # execution_candle = news_event.observation_candles[-1]
+
+        paper_trade(SYMBOL, sentiment, execution_candle, news_event.performance_candles)
+
+        post_trade_analysis(news_event)
+
+    except Exception as e:
+        logging.error(f"[ERROR] Processing Error: {e}")
 
 
 def paper_trade(symbol: str, sentiment: Sentiment, candle: Candle, performance_candles: Candles):
@@ -100,19 +123,30 @@ def _calculate_pnl(trade: dict) -> float:
     return 0.0
 
 
-def _log_performance():
+def _get_roi():
+    if current_capital == 0:
+        return 0.0
+    return (current_capital - STARTING_CAPITAL) / STARTING_CAPITAL * 100
+
+
+def _get_evaluation_result():
     total_pnl = sum(trade['pnl'] for trade in trades if trade['pnl'] is not None)
-    pnl_percentage = (current_capital / STARTING_CAPITAL) * 100
+    return_on_investment = _get_roi()
     win_ratio = _get_win_ratio()
-    [formatted_total_pnl, formatted_pnl, formatted_win_ratio] = round_to_2dp(total_pnl, pnl_percentage, win_ratio)
+    return total_pnl, return_on_investment, win_ratio
+
+
+def _log_performance():
+    [total_pnl, return_on_investment, win_ratio] = _get_evaluation_result()
+    [formatted_total_pnl, formatted_roi, formatted_win_ratio] = round_to_2dp(total_pnl, return_on_investment, win_ratio)
 
     logging.info(f"[TRADE] Total trades made: {len(trades)}")
     logging.info(f"[TRADE] Total PnL: {formatted_total_pnl}")
     logging.info(f"[TRADE] Win Ratio: {formatted_win_ratio}%")
-    logging.info(f"[TRADE] Performance: {formatted_pnl}%")
+    logging.info(f"[TRADE] ROI: {formatted_roi}%")
 
 
-def _evaluate_result():
+def _log_top_trades():
     if not trades:
         logging.info("[EVALUATION] No trades to evaluate.")
         return

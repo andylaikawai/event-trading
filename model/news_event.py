@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from model.candles import Candles, Candle
+from model.candles import Candles
 from utils.util import format_time
 
 

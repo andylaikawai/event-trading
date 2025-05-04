@@ -1,6 +1,7 @@
 from typing import Optional
 
-from config import MAX_OBSERVATION_PERIOD, MAX_HOLDING_PERIOD, LOOK_BACK_PERIOD, FROM_DATE, TO_DATE, SYMBOL, PROCESSED_DATA_OUTPUT_FILE
+from config import MAX_OBSERVATION_PERIOD, MAX_HOLDING_PERIOD, LOOK_BACK_PERIOD, FROM_DATE, TO_DATE, SYMBOL, \
+    PROCESSED_DATA_OUTPUT_FILE
 from data.scripts.fetch_candles import get_candles
 from data.scripts.filter_news import get_filtered_news
 from model.candles import Candles
