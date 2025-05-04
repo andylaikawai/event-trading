@@ -2,13 +2,14 @@ import logging
 
 from backtest.post_trade_analysis import post_trade_analysis
 from backtest.sentiment_analysis import analyze_sentiment
-from config import STARTING_CAPITAL, TAKE_PROFIT, STOP_LOSS, SYMBOL
+from config import STARTING_CAPITAL, SYMBOL
 from data.scripts.data_preprocessor import get_preprocessed_news
 from logger import display_news
 from model.candles import Candle, Candles
 from model.news_event import HistoricalNewsEvent
 from model.sentiment import Sentiment
-from utils.util import round_to_2dp
+from model.trade_params import TradeParams
+from utils.util import round_to_2dp, min_to_ms
 
 MAX_NUMBER_OF_TRADES = 99999
 
@@ -16,27 +17,30 @@ current_capital = STARTING_CAPITAL
 trades: list[dict] = []
 
 
-def run_backtest() -> float:
+def run_backtest(params: TradeParams) -> float:
     news_data = get_preprocessed_news()
     for news_event in news_data:
         if len(trades) >= MAX_NUMBER_OF_TRADES:
             logging.info(f"Reached the maximum number of trades: {MAX_NUMBER_OF_TRADES}")
             break
-        _on_historical_news_event(news_event)
+        _historical_news_event_handler(params, news_event)
     _log_top_trades()
-    return _get_roi()
+    return _get_roi_percent()
 
 
-def _on_historical_news_event(news_event: HistoricalNewsEvent):
+def _historical_news_event_handler(params: TradeParams, news_event: HistoricalNewsEvent):
     try:
         display_news(news_event)
-        sentiment = analyze_sentiment(news_event)
+
+        # TODO let's not hardcode symbol here
+        symbol = SYMBOL
+        sentiment = analyze_sentiment(params, news_event, symbol)
 
         # FIXME it is unfair to analyse future data and trade at an older timestamp, this is for illustration purpose only
         execution_candle = news_event.observation_candles[0]
         # execution_candle = news_event.observation_candles[-1]
 
-        paper_trade(SYMBOL, sentiment, execution_candle, news_event.performance_candles)
+        _paper_trade(params, symbol, sentiment, execution_candle, news_event.performance_candles)
 
         post_trade_analysis(news_event)
 
@@ -44,7 +48,7 @@ def _on_historical_news_event(news_event: HistoricalNewsEvent):
         logging.error(f"[ERROR] Processing Error: {e}")
 
 
-def paper_trade(symbol: str, sentiment: Sentiment, candle: Candle, performance_candles: Candles):
+def _paper_trade(params: TradeParams, symbol: str, sentiment: Sentiment, candle: Candle, performance_candles: Candles):
     if sentiment == Sentiment.NEUTRAL:
         logging.debug("[TRADE] Neutral sentiment detected. No trade executed.")
         return
@@ -72,10 +76,10 @@ def paper_trade(symbol: str, sentiment: Sentiment, candle: Candle, performance_c
     logging.debug(f"[TRADE] Paper traded: {trade}")
 
     # Schedule exit after 30 minutes
-    _exit_trade(trade, performance_candles)
+    _exit_trade(params, trade, performance_candles)
 
 
-def _get_exit_candle(trade: dict, candles: Candles, exit_time: int) -> Candle:
+def _get_exit_candle(params: TradeParams, trade: dict, candles: Candles, exit_time: int) -> Candle:
     entry_price = trade['entry_price']
     direction = trade['direction']
 
@@ -87,22 +91,22 @@ def _get_exit_candle(trade: dict, candles: Candles, exit_time: int) -> Candle:
         gain = (candle.close - entry_price) / entry_price
         if direction == Sentiment.NEGATIVE.name:
             gain *= -1
-        if gain >= TAKE_PROFIT:
+        if gain >= params.take_profit:
             logging.info(f"[TRADE] Take profit")
             return candle
-        if gain <= STOP_LOSS:
+        if gain <= params.stop_loss:
             logging.info(f"[TRADE] Stop loss")
             return candle
 
-    return candles[-1]
+    raise ValueError(f"Not enough performance candles ({len(candles)}) to hold trade for {params.max_holding_period} minutes. Refresh raw candle data")
 
 
-def _exit_trade(trade: dict, candles: Candles, minutes: int = 30):
+def _exit_trade(params: TradeParams, trade: dict, candles: Candles):
     global current_capital
 
-    exit_time = trade['entry_time'] + 1000 * 60 * minutes
+    exit_time = trade['entry_time'] + min_to_ms(params.max_holding_period)
     entry_price = trade['entry_price']
-    exit_candle = _get_exit_candle(trade, candles, exit_time)
+    exit_candle = _get_exit_candle(params, trade, candles, exit_time)
 
     exit_price = exit_candle.close
     price_change_percent = ((exit_price - entry_price) / entry_price) * 100
@@ -123,15 +127,16 @@ def _calculate_pnl(trade: dict) -> float:
     return 0.0
 
 
-def _get_roi():
+def _get_roi_percent() -> float:
     if current_capital == 0:
         return 0.0
-    return (current_capital - STARTING_CAPITAL) / STARTING_CAPITAL * 100
+    roi_percent = (current_capital - STARTING_CAPITAL) / STARTING_CAPITAL * 100
+    return round_to_2dp(roi_percent)[0]
 
 
 def _get_evaluation_result():
     total_pnl = sum(trade['pnl'] for trade in trades if trade['pnl'] is not None)
-    return_on_investment = _get_roi()
+    return_on_investment = _get_roi_percent()
     win_ratio = _get_win_ratio()
     return total_pnl, return_on_investment, win_ratio
 

@@ -1,14 +1,14 @@
 import logging
 from functools import reduce
 
-from config import SYMBOL
 from model.candles import Candles
 from model.news_event import NewsEvent, HistoricalNewsEvent
 from model.sentiment import Sentiment
+from model.trade_params import TradeParams
 
 
-def analyze_sentiment(news_event: HistoricalNewsEvent) -> Sentiment:
-    return _get_sentiment(SYMBOL, news_event.previous_candles, news_event.observation_candles)
+def analyze_sentiment(params: TradeParams, news_event: HistoricalNewsEvent, symbol: str) -> Sentiment:
+    return _get_sentiment(params, symbol, news_event.previous_candles, news_event.observation_candles)
 
 
 def _process_suggestions(news_event: NewsEvent):
@@ -23,7 +23,15 @@ def _process_suggestions(news_event: NewsEvent):
         return None
 
 
-def _get_sentiment(symbol: str, previous_candles: Candles, observation_candles: Candles) -> Sentiment:
+def _get_sentiment(params: TradeParams, symbol: str, previous_candles: Candles, observation_candles: Candles) -> Sentiment:
+    if len(previous_candles) < params.look_back_period:
+        raise ValueError(f"Not enough previous candles ({len(previous_candles)}). LOOKBACK_PERIOD is set to {params.look_back_period} minutes. Refresh raw candle data")
+    if len(observation_candles) < params.max_observation_period:
+        raise ValueError(f"Not enough observation candles ({len(previous_candles)}). MAX_OBSERVATION_PERIOD is set to {params.look_back_period} minutes. Refresh raw candle data")
+
+    previous_candles = previous_candles[-params.look_back_period:]
+    observation_candles = observation_candles[:params.max_observation_period]
+
     first_candle = previous_candles[0]
     current_candle = observation_candles[-1]
     previous_close = first_candle.close
@@ -44,10 +52,9 @@ def _get_sentiment(symbol: str, previous_candles: Candles, observation_candles: 
             return Sentiment.NEGATIVE
     return Sentiment.NEUTRAL
 
+
 def _get_average_volume(candles: Candles):
     return reduce(lambda x, y: x + y, map(lambda candle: candle.volume, candles)) / len(candles)
-
-
 
 # def analyze_sentiment(news_event):
 #
