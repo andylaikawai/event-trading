@@ -9,7 +9,6 @@ It does not randomly test parameters but instead builds a probabilistic model of
 
 Here's how it works:
 
-
 1. Initialization:
 Optuna starts with a few random trials to explore the parameter space.
 
