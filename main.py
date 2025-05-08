@@ -1,6 +1,6 @@
 import time
 
-from backtest.back_test import run_backtest
+from backtest.backtest_runner import run_backtest
 from config import IS_BACKTEST_MODE, MAX_HOLDING_PERIOD, MAX_OBSERVATION_PERIOD, LOOK_BACK_PERIOD, TAKE_PROFIT, \
     STOP_LOSS
 from logger import setup_logger

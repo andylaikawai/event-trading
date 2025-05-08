@@ -1,6 +1,6 @@
 import logging
 
-from backtest.post_trade_analysis import post_trade_analysis
+from backtest.post_trade_analysis import post_trade_analysis, log_performance, get_roi_percent, log_top_trades
 from backtest.sentiment_analysis import analyze_sentiment
 from config import STARTING_CAPITAL, SYMBOL
 from data.scripts.data_preprocessor import get_preprocessed_news
@@ -19,13 +19,15 @@ trades: list[dict] = []
 
 def run_backtest(params: TradeParams) -> float:
     news_data = get_preprocessed_news()
+
     for news_event in news_data:
         if len(trades) >= MAX_NUMBER_OF_TRADES:
             logging.info(f"Reached the maximum number of trades: {MAX_NUMBER_OF_TRADES}")
             break
         _historical_news_event_handler(params, news_event)
-    _log_top_trades()
-    return _get_roi_percent()
+
+    log_top_trades(trades)
+    return get_roi_percent(current_capital)
 
 
 def _historical_news_event_handler(params: TradeParams, news_event: HistoricalNewsEvent):
@@ -116,7 +118,7 @@ def _exit_trade(params: TradeParams, trade: dict, candles: Candles):
     trade['pnl'] = round_to_2dp(_calculate_pnl(trade))[0]
     current_capital += trade['pnl']
     logging.info(f"[TRADE]: {trade}")
-    _log_performance()
+    log_performance(trades, current_capital)
 
 
 def _calculate_pnl(trade: dict) -> float:
@@ -125,54 +127,3 @@ def _calculate_pnl(trade: dict) -> float:
     elif trade['direction'] == Sentiment.NEGATIVE.name:
         return (trade['entry_price'] - trade['exit_price']) * trade['amount']
     return 0.0
-
-
-def _get_roi_percent() -> float:
-    if current_capital == 0:
-        return 0.0
-    roi_percent = (current_capital - STARTING_CAPITAL) / STARTING_CAPITAL * 100
-    return round_to_2dp(roi_percent)[0]
-
-
-def _get_evaluation_result():
-    total_pnl = sum(trade['pnl'] for trade in trades if trade['pnl'] is not None)
-    return_on_investment = _get_roi_percent()
-    win_ratio = _get_win_ratio()
-    return total_pnl, return_on_investment, win_ratio
-
-
-def _log_performance():
-    [total_pnl, return_on_investment, win_ratio] = _get_evaluation_result()
-    [formatted_total_pnl, formatted_roi, formatted_win_ratio] = round_to_2dp(total_pnl, return_on_investment, win_ratio)
-
-    logging.info(f"[TRADE] Total trades made: {len(trades)}")
-    logging.info(f"[TRADE] Total PnL: {formatted_total_pnl}")
-    logging.info(f"[TRADE] Win Ratio: {formatted_win_ratio}%")
-    logging.info(f"[TRADE] ROI: {formatted_roi}%")
-
-
-def _log_top_trades():
-    if not trades:
-        logging.info("[EVALUATION] No trades to evaluate.")
-        return
-
-    sorted_trades = sorted(trades, key=lambda trade: trade['pnl'], reverse=True)
-
-    # Get top 10 gainers and losers
-    top_gainers = sorted_trades[:10]
-    top_losers = sorted_trades[-10:]
-
-    logging.info("[EVALUATION] Top 10 Gainers:")
-    for trade in top_gainers:
-        logging.info(trade)
-
-    logging.info("[EVALUATION] Top 10 Losers:")
-    for trade in reversed(top_losers):  # Reverse to show the largest losses first
-        logging.info(trade)
-
-
-def _get_win_ratio() -> float:
-    if not trades:
-        return 0.0
-    winning_trades = sum(1 for trade in trades if trade['pnl'] > 0)
-    return winning_trades / len(trades) * 100

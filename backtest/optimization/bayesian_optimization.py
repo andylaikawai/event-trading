@@ -1,6 +1,6 @@
 import optuna
 
-from backtest.back_test import run_backtest
+from backtest.backtest_runner import run_backtest
 from model.trade_params import TradeParams
 
 """
