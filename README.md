@@ -1,12 +1,14 @@
-# Tech Stack
+# Setup guide
+
+## Tech Stack
 
 - Python 3.9.6
 
-# Install dependencies
+## Install dependencies
 
 - `pip install -r requirements.txt`
 
-# How to use
+## How to use
 
 - run `main.py` to start backtesting. See `config.py` for configuration. Output `.logs` files.
 
@@ -128,7 +130,6 @@ price is 86118.67 at 2025-03-07 08:43:00. Therefore, the SHORT decision is corre
 [
   {
     "id": 1,
-    "decision": "SHORT",
     "correct": true
   }
   //  ...+9 other results
