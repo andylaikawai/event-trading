@@ -42,7 +42,7 @@ def preprocess_news_data() -> list[dict]:
 
 
 def get_preprocessed_news() -> list[HistoricalNewsEvent]:
-    raw_news = read_from_cache_or_fetch(PROCESSED_DATA_OUTPUT_FILE, preprocess_news_data)
+    raw_news = read_from_cache_or_fetch(PROCESSED_DATA_OUTPUT_FILE, preprocess_news_data, indent=4)
     return [HistoricalNewsEvent.from_dict(raw_news) for raw_news in raw_news]
 
 

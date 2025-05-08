@@ -25,84 +25,101 @@ For each news item, given the time of the news, the script will populate:
 - performance candle: 30 minutes after the news timestamp, for performance evaluation purpose only. Should not be used
   for sentiment analysis.
 
-Sample
+#### Sample
+Given the following configuration:
+
+```python
+NUMBER_OF_PREVIOUS_CANDLES = 3
+NUMBER_OF_OBSERVATION_CANDLES = 3
+NUMBER_OF_PERFORMANCE_CANDLES = 30
+```
 
 ```json
-[
-  {
-    "title": "CoinDesk (@CoinDesk): As countries like the U.S. and El Salvador buy bitcoin for their reserves, yours should too, says @anuragarjun @AvailProject. \n\nOpinion. \n\ntrib.al/JUwmSVt",
-    "time": 1743435398844,
-    "url": "https://twitter.com/CoinDesk/status/1906732376517955771",
-    "source": "Twitter",
-    "previous_candles": [
-      [
-        1743435240000,
-        83739.9,
-        83739.9,
-        83652.8,
-        83661.8,
-        1.745632,
-        "2025-03-31 23:34:00"
-      ],
-      [
-        1743435300000,
-        83665.9,
-        83718.6,
-        83625.6,
-        83641.5,
-        2.16294505,
-        "2025-03-31 23:35:00"
-      ],
-      [
-        1743435360000,
-        83641.5,
-        83685.5,
-        83540.6,
-        83540.6,
-        1.38621996,
-        "2025-03-31 23:36:00"
-      ]
-    ],
-    "observation_candles": [
-      [
-        1743435420000,
-        83547.0,
-        83610.1,
-        83547.0,
-        83575.6,
-        0.55174547,
-        "2025-03-31 23:37:00"
-      ],
-      [
-        1743435480000,
-        83575.7,
-        83641.4,
-        83575.7,
-        83591.8,
-        0.6371007,
-        "2025-03-31 23:38:00"
-      ],
-      [
-        1743435540000,
-        83582.9,
-        83615.1,
-        83539.6,
-        83539.6,
-        0.76424132,
-        "2025-03-31 23:39:00"
-      ]
-    ],
-    "performance_candle": [
-      1743437160000,
-      83579.7,
-      83614.5,
-      83571.7,
-      83594.0,
-      1.37906947,
-      "2025-04-01 00:06:00"
-    ]
-  }
-]
+{
+  "title": "db (@tier10k): *TRUMP SIGNS EXECUTIVE ORDER TO ESTABLISH STRATEGIC BITCOIN RESERVE: SACKS",
+  "time": 1741306326681,
+  "url": "https://twitter.com/tier10k/status/1897802400632648066",
+  "source": "Twitter",
+  "previous_candles": [
+    {
+      "timestamp": 1741306200000,
+      "open": 89886.67,
+      "high": 89961.27,
+      "low": 89878.51,
+      "close": 89960.51,
+      "volume": 4.85351,
+      "datetime": "2025-03-07 08:10:00"
+    },
+    {
+      "timestamp": 1741306260000,
+      "open": 89960.52,
+      "high": 90229.97,
+      "low": 89932.45,
+      "close": 90218.6,
+      "volume": 62.09979,
+      "datetime": "2025-03-07 08:11:00"
+    },
+    {
+      "timestamp": 1741306320000,
+      "open": 90218.59,
+      "high": 90595.72,
+      "low": 90208.24,
+      "close": 90591.18,
+      "volume": 93.9068,
+      "datetime": "2025-03-07 08:12:00"
+    }
+  ],
+  "observation_candles": [
+    {
+      "timestamp": 1741306380000,
+      "open": 90591.19,
+      "high": 91283.02,
+      "low": 90591.19,
+      "close": 91123.95,
+      "volume": 278.03794,
+      "datetime": "2025-03-07 08:13:00"
+    },
+    {
+      "timestamp": 1741306440000,
+      "open": 91123.94,
+      "high": 91212.0,
+      "low": 90218.0,
+      "close": 90218.0,
+      "volume": 218.40361,
+      "datetime": "2025-03-07 08:14:00"
+    },
+    {
+      "timestamp": 1741306500000,
+      "open": 90218.0,
+      "high": 90420.0,
+      "low": 88300.0,
+      "close": 89218.58,
+      "volume": 720.8261,
+      "datetime": "2025-03-07 08:15:00"
+    }
+  ],
+  "performance_candles": [
+    {
+      "timestamp": 1741306380000,
+      "open": 90591.19,
+      "high": 91283.02,
+      "low": 90591.19,
+      "close": 91123.95,
+      "volume": 278.03794,
+      "datetime": "2025-03-07 08:13:00"
+    },
+    //   ...
+    {
+      "timestamp": 1741308300000,
+      "open": 85918.14,
+      "high": 85918.14,
+      "low": 85519.56,
+      "close": 85594.34,
+      "volume": 242.43206,
+      "datetime": "2025-03-07 08:45:00"
+    }
+  ]
+}
 ```
 
 
